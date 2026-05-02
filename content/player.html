@@ -1,611 +1,651 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>WESPA Player Profile | Dynamic Player Stats</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>WESPA Player Profile | Dynamic Player Stats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f4f7fc;
-      color: #1e2a3e;
-      line-height: 1.5;
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fc;
+            color: #1e2a3e;
+            line-height: 1.5;
+        }
 
-    .app-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px 20px 40px;
-    }
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
+        }
 
-    .loader {
-      text-align: center;
-      padding: 60px 20px;
-      font-size: 1.2rem;
-      color: #2c5f8a;
-    }
+        .loader {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2rem;
+            color: #2c5f8a;
+        }
 
-    .error-box {
-      background: #fee2e2;
-      border-left: 6px solid #c00;
-      padding: 20px;
-      border-radius: 16px;
-      margin: 30px 0;
-    }
+        .error-box {
+            background: #fee2e2;
+            border-left: 6px solid #c00;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 30px 0;
+        }
 
-    /* Player Header */
-    .player-header {
-      background: white;
-      border-radius: 28px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
-      padding: 24px 28px;
-      margin-bottom: 28px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 20px;
-    }
+        /* Player Header */
+        .player-header {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+            padding: 24px 28px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
 
-    .player-info {
-      flex: 2;
-    }
+        .player-info {
+            flex: 2;
+        }
 
-    .player-name {
-      font-size: 2.2rem;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+        .player-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-    .country-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #eef2fa;
-      padding: 6px 14px;
-      border-radius: 40px;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
+        .country-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef2fa;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
 
-    .country-badge img {
-      width: 26px;
-      height: auto;
-      border-radius: 2px;
-    }
+        .country-badge img {
+            width: 26px;
+            height: auto;
+            border-radius: 2px;
+        }
 
-    .player-photo {
-      width: 110px;
-      height: 110px;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 3px solid #fff;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      background: #e9ecef;
-    }
+        .player-photo {
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            background: #e9ecef;
+        }
 
-    /* Stats Grid */
-    .stats-grid {
-      background: white;
-      border-radius: 28px;
-      padding: 20px 28px;
-      margin-bottom: 28px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
+        /* Stats Grid */
+        .stats-grid {
+            background: white;
+            border-radius: 28px;
+            padding: 20px 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
 
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-top: 8px;
-    }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 8px;
+        }
 
-    .stat-card {
-      background: #f8fafd;
-      border-radius: 20px;
-      padding: 14px 18px;
-    }
+        .stat-card {
+            background: #f8fafd;
+            border-radius: 20px;
+            padding: 14px 18px;
+        }
 
-    .stat-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      font-weight: 600;
-      color: #5b6e8c;
-      letter-spacing: 0.5px;
-    }
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #5b6e8c;
+            letter-spacing: 0.5px;
+        }
 
-    .stat-value {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #1e4663;
-      line-height: 1.2;
-    }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1e4663;
+            line-height: 1.2;
+        }
 
-    .divider {
-      height: 1px;
-      background: #e2e8f0;
-      margin: 20px 0 8px;
-    }
+        .stat-value-small {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #5b6e8c;
+            margin-top: 4px;
+        }
 
-    /* Tables */
-    .tournament-table, .headtohead-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
+        .divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 20px 0 8px;
+        }
 
-    .tournament-table th, .headtohead-table th {
-      text-align: left;
-      padding: 14px 8px 10px 0;
-      font-weight: 600;
-      color: #2c3e50;
-      border-bottom: 2px solid #e0e9f0;
-    }
+        /* Tables */
+        .tournament-table, .headtohead-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
 
-    .tournament-table td, .headtohead-table td {
-      padding: 12px 8px 12px 0;
-      border-bottom: 1px solid #edf2f7;
-      vertical-align: top;
-    }
+        .tournament-table th, .headtohead-table th {
+            text-align: left;
+            padding: 14px 8px 10px 0;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e0e9f0;
+        }
 
-    .expand-btn {
-      background: #eef2ff;
-      border: none;
-      padding: 5px 12px;
-      border-radius: 30px;
-      font-weight: 600;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: 0.1s;
-      color: #1f6392;
-    }
+        .tournament-table td, .headtohead-table td {
+            padding: 12px 8px 12px 0;
+            border-bottom: 1px solid #edf2f7;
+            vertical-align: top;
+        }
 
-    .expand-btn:hover {
-      background: #dfe6f5;
-    }
+        .expand-btn {
+            background: #eef2ff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.1s;
+            color: #1f6392;
+        }
 
-    .expand-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+        .expand-btn:hover {
+            background: #dfe6f5;
+        }
 
-    .rounds-table {
-      width: 100%;
-      margin-top: 12px;
-      background: #fafcff;
-      border-radius: 16px;
-      overflow: hidden;
-      font-size: 0.85rem;
-    }
+        .expand-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-    .rounds-table th, .rounds-table td {
-      padding: 8px 12px;
-      border-bottom: 1px solid #e2edf2;
-    }
+        .rounds-table {
+            width: 100%;
+            margin-top: 12px;
+            background: #fafcff;
+            border-radius: 16px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
 
-    .collapse-row {
-      display: none;
-    }
+        .rounds-table th, .rounds-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2edf2;
+        }
 
-    .badge-win {
-      color: #2b7a3e;
-      font-weight: 700;
-    }
+        .collapse-row {
+            display: none;
+        }
 
-    .badge-loss {
-      color: #bc4e2c;
-    }
+        .badge-win {
+            color: #2b7a3e;
+            font-weight: 700;
+        }
 
-    .badge-draw {
-      color: #e68a2e;
-    }
+        .badge-loss {
+            color: #bc4e2c;
+        }
 
-    .footer-note {
-      margin-top: 30px;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #6c86a3;
-      border-top: 1px solid #e0e9f0;
-      padding-top: 24px;
-    }
+        .badge-draw {
+            color: #e68a2e;
+        }
 
-    @media (max-width: 700px) {
-      .app-container { padding: 16px; }
-      .player-name { font-size: 1.6rem; }
-      .stats-row { grid-template-columns: 1fr 1fr; }
-      .tournament-table { font-size: 0.75rem; }
-    }
+        .footer-note {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6c86a3;
+            border-top: 1px solid #e0e9f0;
+            padding-top: 24px;
+        }
 
-    .spinner {
-      display: inline-block;
-      animation: spin 1s linear infinite;
-    }
+        @media (max-width: 700px) {
+            .app-container { padding: 16px; }
+            .player-name { font-size: 1.6rem; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .tournament-table { font-size: 0.75rem; }
+        }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #5a6e8a;
+            border-bottom: 3px solid transparent;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #1f6392;
+            border-bottom-color: #1f6392;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
 
 <div class="app-container" id="app">
-  <div id="loadingView" class="loader">
-    <i class="fas fa-spinner fa-pulse fa-2x"></i>
-    <p>Loading player data...</p>
-  </div>
-  <div id="mainContent" style="display: none;"></div>
+    <div id="loadingView" class="loader">
+        <i class="fas fa-spinner fa-pulse fa-2x"></i>
+        <p>Loading player data...</p>
+    </div>
+    <div id="mainContent" style="display: none;"></div>
 </div>
 
 <script>
-  // API endpoint (uses nginx reverse proxy, so relative path)
-  const API_BASE = '/api';
-
-  // Get player ID from URL (?id=3039)
-  function getPlayerIdFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('id') || params.get('player');
-  }
-
-  // Fetch player summary (no game details)
-  async function fetchPlayerSummary(playerId) {
-    const url = `${API_BASE}/player.php?player=${playerId}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    if (!data || !data.playerid) throw new Error('Invalid player data');
-    return data;
-  }
-
-  // Lazy-load tournament games
-  async function fetchTournamentGames(playerId, tourneyId) {
-    const url = `${API_BASE}/tournament.php?player=${playerId}&tourneyid=${tourneyId}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  }
-
-  // Render player header
-  function renderPlayerHeader(data) {
-    const countryCode = data.country || 'USA';
-    const flagUrl = `https://legacy.wespa.org/aardvark/flags/${countryCode}.png`;
-    const photoUrl = data.photourl || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=1f6392&color=fff&rounded=true&size=120`;
+    // API endpoint (uses nginx reverse proxy, so relative path)
+    const API_BASE = '/api';
     
-    return `
-      <div class="player-header">
-        <div class="player-info">
-          <div class="player-name">
-            ${escapeHtml(data.name)}
-            <span class="country-badge">
-              <img src="${flagUrl}" alt="${countryCode}" onerror="this.src='https://flagcdn.com/w320/us.png'"> ${countryCode}
-            </span>
-          </div>
-          <div style="margin-top: 12px; opacity:0.8;">
-            <i class="fas fa-id-card"></i> WESPA ID: ${data.playerid} &nbsp;|&nbsp;
-            <i class="fas fa-chart-line"></i> Current CSW Rating: <strong>${data.cswrating || '—'}</strong>
-          </div>
-        </div>
-        <img class="player-photo" src="${photoUrl}" alt="${data.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=90b4d9&color=fff'">
-      </div>
-    `;
-  }
+    // New v2 endpoints
+    const getPlayerUrl = (playerId) => `${API_BASE}/v2/player/${playerId}`;
+    const getTournamentUrl = (playerId, tourneyId) => `${API_BASE}/v2/player/${playerId}/tournaments/${tourneyId}`;
 
-  // Render stats grid
-  function renderStatsGrid(stats) {
-    if (!stats) return '<div class="stats-grid">No statistics available</div>';
-    
-    return `
-      <div class="stats-grid">
-        <div class="stats-row">
-          <div class="stat-card"><div class="stat-label">Games Played</div><div class="stat-value">${stats.gamesPlayed || 0}</div></div>
-          <div class="stat-card"><div class="stat-label">W / L / D</div><div class="stat-value">${stats.wins || 0} / ${stats.losses || 0} / ${stats.draws || 0}</div></div>
-          <div class="stat-card"><div class="stat-label">Win %</div><div class="stat-value">${stats.winPercentage || 0}%</div></div>
-          <div class="stat-card"><div class="stat-label">Avg Score</div><div class="stat-value">${stats.averageScore || '—'}</div></div>
-          <div class="stat-card"><div class="stat-label">Avg Against</div><div class="stat-value">${stats.averageAgainst || '—'}</div></div>
-        </div>
-        <div class="divider"></div>
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-label">High Game</div>
-            <div class="stat-value">${stats.highGame || '—'}</div>
-            <div class="small-stat">${stats.highGameOpponent ? `vs ${escapeHtml(stats.highGameOpponent)}` : ''}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Low Game</div>
-            <div class="stat-value">${stats.lowGame || '—'}</div>
-            <div class="small-stat">${stats.lowGameOpponent ? `vs ${escapeHtml(stats.lowGameOpponent)}` : ''}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Biggest Win</div>
-            <div class="stat-value">${stats.biggestWin || '—'}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">High Loss</div>
-            <div class="stat-value">${stats.highLoss || '—'}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Low Win</div>
-            <div class="stat-value">${stats.lowWin || '—'}</div>
-          </div>
-        </div>
-        <div class="stats-row">
-          <div class="stat-card"><span class="stat-label">＜300</span> <span class="stat-value" style="font-size:1.3rem">${stats.gamesUnder300 || 0}</span></div>
-          <div class="stat-card"><span class="stat-label">300-399</span> <span class="stat-value" style="font-size:1.3rem">${stats.games300to399 || 0}</span></div>
-          <div class="stat-card"><span class="stat-label">400-499</span> <span class="stat-value" style="font-size:1.3rem">${stats.games400to499 || 0}</span></div>
-          <div class="stat-card"><span class="stat-label">500-599</span> <span class="stat-value" style="font-size:1.3rem">${stats.games500to599 || 0}</span></div>
-          <div class="stat-card"><span class="stat-label">600+</span> <span class="stat-value" style="font-size:1.3rem">${stats.games600plus || 0}</span></div>
-        </div>
-      </div>
-    `;
-  }
-
-  // Generate rounds table HTML
-  function generateRoundsTable(rounds, tournamentName, tournamentDate) {
-    if (!rounds || rounds.length === 0) {
-      return '<p style="padding: 16px;">No game data available for this tournament.</p>';
+    // Get player ID from URL (?id=3039)
+    function getPlayerIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id') || params.get('player');
     }
-    
-    return `
-      <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
-        <strong>${escapeHtml(tournamentName)} (${tournamentDate})</strong>
-        <table class="rounds-table" style="width:100%; margin-top: 12px;">
-          <thead>
-            <tr><th>Round</th><th>Opponent</th><th>Opponent Rating</th><th>Result</th><th>Score</th><th>Opp Score</th><th>Player Rating</th></tr>
-          </thead>
-          <tbody>
-            ${rounds.map(r => `
-              <tr>
-                <td>${r.round}</td>
-                <td><a href="?id=${r.opponent_id}" style="color: #1f6392; text-decoration: none;">${escapeHtml(r.opponent_name)}</a></td>
-                <td>${r.opponent_rating || '—'}</td>
-                <td class="${r.result === 'W' ? 'badge-win' : (r.result === 'L' ? 'badge-loss' : 'badge-draw')}">
-                  <strong>${r.result}</strong>
-                </td>
-                <td>${r.score_for}</td>
-                <td>${r.score_against}</td>
-                <td>${r.player_rating_at_time || '—'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
 
-  // Load tournament games on demand
-  async function loadTournamentGames(playerId, tourneyId, buttonElement, targetRowId, tournamentName, tournamentDate) {
-    // Show loading state
-    buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-    buttonElement.disabled = true;
-    
-    try {
-      const data = await fetchTournamentGames(playerId, tourneyId);
-      
-      const roundsHtml = generateRoundsTable(data.rounds, tournamentName, tournamentDate);
-      const targetRow = document.getElementById(targetRowId);
-      if (targetRow) {
-        targetRow.innerHTML = `<td colspan="8">${roundsHtml}</td>`;
-      }
-      
-      // Update button to collapse mode
-      buttonElement.innerHTML = '<i class="fas fa-minus-circle"></i> Hide';
-      buttonElement.disabled = false;
-      buttonElement.setAttribute('data-loaded', 'true');
-      
-    } catch (error) {
-      console.error('Error loading tournament games:', error);
-      buttonElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Retry';
-      buttonElement.disabled = false;
-      
-      const targetRow = document.getElementById(targetRowId);
-      if (targetRow && targetRow.innerHTML.includes('Loading')) {
-        targetRow.innerHTML = `<td colspan="8"><div class="error-box" style="margin: 10px;">Failed to load games: ${error.message}</div></td>`;
-      }
+    // Fetch player summary from v2 endpoint
+    async function fetchPlayerSummary(playerId) {
+        const url = getPlayerUrl(playerId);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const data = await response.json();
+        if (!data || !data.playerid) throw new Error('Invalid player data');
+        return data;
     }
-  }
 
-  // Build tournament table with lazy-load buttons
-  function buildTournamentsTable(tournaments, playerId) {
-    if (!tournaments || tournaments.length === 0) {
-      return '<div class="stats-grid">No tournament data found.</div>';
+    // Lazy-load tournament games from v2 endpoint
+    async function fetchTournamentGames(playerId, tourneyId) {
+        const url = getTournamentUrl(playerId, tourneyId);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        return await response.json();
     }
-    
-    let rows = '';
-    tournaments.forEach((t, idx) => {
-      const uniqueId = `tourney-${t.tourneyid || idx}`;
-      const changeClass = t.ratingChange >= 0 ? 'style="color:#2b7a3e"' : 'style="color:#bc4e2c"';
-      const record = `${t.wins || 0}-${t.losses || 0}${t.draws ? `-${t.draws}` : ''}`;
-      
-      rows += `
-        <tr data-tourney-id="${t.tourneyid}">
-          <td>
-            <button class="expand-btn" 
-                data-player="${playerId}"
-                data-tourney="${t.tourneyid}"
-                data-target="${uniqueId}"
-                data-name="${escapeHtml(t.name)}"
-                data-date="${t.date}">
-              <i class="fas fa-plus-circle"></i> Details
-            </button>
-          </td>
-          <td>${escapeHtml(t.name || '—')}</td>
-          <td>${t.date || '—'}</td>
-          <td>${record}</td>
-          <td>${t.spread || 0}</td>
-          <td>${t.place || '—'}</td>
-          <td>${t.endRating || '—'}</td>
-          <td ${changeClass}>${t.ratingChange > 0 ? `+${t.ratingChange}` : t.ratingChange || 0}</td>
-        </tr>
-        <tr class="collapse-row" id="${uniqueId}" style="display: none;">
-          <td colspan="8"><div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-pulse"></i> Loading games...</div></td>
-        </tr>
-      `;
-    });
-    
-    return `
-      <div style="overflow-x: auto; background: white; border-radius: 24px; padding: 0;">
-        <table class="tournament-table" style="width: 100%;">
-          <thead>
-            <tr><th></th><th>Tournament</th><th>Date</th><th>W-L-D</th><th>Spread</th><th>Place</th><th>End Rating</th><th>Change</th></tr>
-          </thead>
-          <tbody>
-            ${rows}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
 
-  // Simple placeholder for head-to-head (can be expanded later)
-  function buildHeadToHeadPlaceholder() {
-    return `
-      <div class="stats-grid" style="text-align: center; padding: 40px;">
-        <i class="fas fa-chart-line" style="font-size: 48px; color: #90b4d9; margin-bottom: 16px; display: block;"></i>
-        <h3>Head-to-Head Statistics</h3>
-        <p>Head-to-head data will be available in a future update.<br>
-        Click on any tournament above to see game-by-game results.</p>
-      </div>
-    `;
-  }
-
-  // Attach lazy-load event listeners after rendering
-  function attachLazyLoadEvents() {
-    document.querySelectorAll('.expand-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const targetId = btn.getAttribute('data-target');
-        const tourneyId = btn.getAttribute('data-tourney');
-        const playerId = btn.getAttribute('data-player');
-        const tournamentName = btn.getAttribute('data-name');
-        const tournamentDate = btn.getAttribute('data-date');
-        const targetRow = document.getElementById(targetId);
+    // Render player header
+    function renderPlayerHeader(data) {
+        const countryCode = data.country || 'USA';
+        const flagUrl = `https://legacy.wespa.org/aardvark/flags/${countryCode}.png`;
+        const photoUrl = data.photourl || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=1f6392&color=fff&rounded=true&size=120`;
         
-        if (!targetRow) return;
+        return `
+            <div class="player-header">
+                <div class="player-info">
+                    <div class="player-name">
+                        ${escapeHtml(data.name)}
+                        <span class="country-badge">
+                            <img src="${flagUrl}" alt="${countryCode}" onerror="this.src='https://flagcdn.com/w320/us.png'"> ${countryCode}
+                        </span>
+                    </div>
+                    <div style="margin-top: 12px; opacity:0.8;">
+                        <i class="fas fa-id-card"></i> WESPA ID: ${data.playerid} &nbsp;|&nbsp;
+                        <i class="fas fa-chart-line"></i> Current CSW Rating: <strong>${data.cswrating || '—'}</strong>
+                    </div>
+                </div>
+                <img class="player-photo" src="${photoUrl}" alt="${data.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=90b4d9&color=fff'">
+            </div>
+        `;
+    }
+
+    // Render stats grid from v2 stats object
+    function renderStatsGrid(stats) {
+        if (!stats) return '<div class="stats-grid">No statistics available</div>';
         
-        // If already expanded, just collapse
-        if (targetRow.style.display !== 'none') {
-          targetRow.style.display = 'none';
-          btn.innerHTML = '<i class="fas fa-plus-circle"></i> Details';
-          return;
+        return `
+            <div class="stats-grid">
+                <div class="stats-row">
+                    <div class="stat-card"><div class="stat-label">Games Played</div><div class="stat-value">${stats.gamesPlayed || 0}</div></div>
+                    <div class="stat-card"><div class="stat-label">W / L / D</div><div class="stat-value">${stats.wins || 0} / ${stats.losses || 0} / ${stats.draws || 0}</div></div>
+                    <div class="stat-card"><div class="stat-label">Win %</div><div class="stat-value">${stats.winPercentage || 0}%</div></div>
+                    <div class="stat-card"><div class="stat-label">Avg Score</div><div class="stat-value">${stats.averageScore || '—'}</div></div>
+                    <div class="stat-card"><div class="stat-label">Avg Against</div><div class="stat-value">${stats.averageAgainst || '—'}</div></div>
+                </div>
+                <div class="divider"></div>
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">High Game</div>
+                        <div class="stat-value">${stats.highGame || '—'}</div>
+                        <div class="stat-value-small">${stats.highGameOpponent ? `vs ${escapeHtml(stats.highGameOpponent)}` : ''}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Low Game</div>
+                        <div class="stat-value">${stats.lowGame || '—'}</div>
+                        <div class="stat-value-small">${stats.lowGameOpponent ? `vs ${escapeHtml(stats.lowGameOpponent)}` : ''}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Biggest Win</div>
+                        <div class="stat-value">${stats.biggestWin || '—'}</div>
+                        <div class="stat-value-small">${stats.biggestWinOpponent ? `vs ${escapeHtml(stats.biggestWinOpponent)}` : ''}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">High Loss</div>
+                        <div class="stat-value">${stats.highLoss || '—'}</div>
+                        <div class="stat-value-small">${stats.highLossOpponent ? `vs ${escapeHtml(stats.highLossOpponent)}` : ''}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Low Win</div>
+                        <div class="stat-value">${stats.lowWin || '—'}</div>
+                        <div class="stat-value-small">${stats.lowWinOpponent ? `vs ${escapeHtml(stats.lowWinOpponent)}` : ''}</div>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-card"><span class="stat-label">＜300</span> <span class="stat-value" style="font-size:1.3rem">${stats.gamesUnder300 || 0}</span></div>
+                    <div class="stat-card"><span class="stat-label">300-399</span> <span class="stat-value" style="font-size:1.3rem">${stats.games300to399 || 0}</span></div>
+                    <div class="stat-card"><span class="stat-label">400-499</span> <span class="stat-value" style="font-size:1.3rem">${stats.games400to499 || 0}</span></div>
+                    <div class="stat-card"><span class="stat-label">500-599</span> <span class="stat-value" style="font-size:1.3rem">${stats.games500to599 || 0}</span></div>
+                    <div class="stat-card"><span class="stat-label">600+</span> <span class="stat-value" style="font-size:1.3rem">${stats.games600plus || 0}</span></div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Generate rounds table HTML from v2 rounds data
+    function generateRoundsTable(rounds, tournamentName, tournamentDate) {
+        if (!rounds || rounds.length === 0) {
+            return '<p style="padding: 16px;">No game data available for this tournament.</p>';
         }
         
-        // Check if already loaded (has content and not just loading)
-        if (btn.getAttribute('data-loaded') === 'true') {
-          targetRow.style.display = 'table-row';
-          btn.innerHTML = '<i class="fas fa-minus-circle"></i> Hide';
-          return;
+        return `
+            <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
+                <strong>${escapeHtml(tournamentName)} (${tournamentDate})</strong>
+                <table class="rounds-table" style="width:100%; margin-top: 12px;">
+                    <thead>
+                        <tr><th>Round</th><th>Opponent</th><th>Opponent Rating</th><th>Result</th><th>Score</th><th>Opp Score</th><th>Player Rating</th></tr>
+                    </thead>
+                    <tbody>
+                        ${rounds.map(r => `
+                            <tr>
+                                <td>${r.round}</td>
+                                <td><a href="?id=${r.opponent_id}" style="color: #1f6392; text-decoration: none;">${escapeHtml(r.opponent_name)}</a></td>
+                                <td>${r.opponent_rating || '—'}</td>
+                                <td class="${r.result === 'W' ? 'badge-win' : (r.result === 'L' ? 'badge-loss' : 'badge-draw')}">
+                                    <strong>${r.result}</strong>
+                                </td>
+                                <td>${r.score_for}</td>
+                                <td>${r.score_against}</td>
+                                <td>${r.player_rating_at_time || '—'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // Load tournament games on demand
+    async function loadTournamentGames(playerId, tourneyId, buttonElement, targetRowId, tournamentName, tournamentDate) {
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        buttonElement.disabled = true;
+        
+        try {
+            const data = await fetchTournamentGames(playerId, tourneyId);
+            
+            const roundsHtml = generateRoundsTable(data.rounds, tournamentName, tournamentDate);
+            const targetRow = document.getElementById(targetRowId);
+            if (targetRow) {
+                targetRow.innerHTML = `<td colspan="8">${roundsHtml}</td>`;
+            }
+            
+            buttonElement.innerHTML = '<i class="fas fa-minus-circle"></i> Hide';
+            buttonElement.disabled = false;
+            buttonElement.setAttribute('data-loaded', 'true');
+            
+        } catch (error) {
+            console.error('Error loading tournament games:', error);
+            buttonElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Retry';
+            buttonElement.disabled = false;
+            
+            const targetRow = document.getElementById(targetRowId);
+            if (targetRow && targetRow.innerHTML.includes('Loading')) {
+                targetRow.innerHTML = `<td colspan="8"><div class="error-box" style="margin: 10px;">Failed to load games: ${error.message}</div></td>`;
+            }
+        }
+    }
+
+    // Build tournament table with lazy-load buttons
+    function buildTournamentsTable(tournaments, playerId) {
+        if (!tournaments || tournaments.length === 0) {
+            return '<div class="stats-grid">No tournament data found.</div>';
         }
         
-        // Show row with loading message
-        targetRow.style.display = 'table-row';
+        let rows = '';
+        tournaments.forEach((t) => {
+            const uniqueId = `tourney-${t.tourneyid}`;
+            const changeClass = t.ratingChange >= 0 ? 'style="color:#2b7a3e"' : 'style="color:#bc4e2c"';
+            const record = `${t.wins || 0}-${t.losses || 0}${t.draws ? `-${t.draws}` : ''}`;
+            
+            rows += `
+                <tr data-tourney-id="${t.tourneyid}">
+                    <td>
+                        <button class="expand-btn" 
+                                data-player="${playerId}"
+                                data-tourney="${t.tourneyid}"
+                                data-target="${uniqueId}"
+                                data-name="${escapeHtml(t.name)}"
+                                data-date="${t.date}">
+                            <i class="fas fa-plus-circle"></i> Details
+                        </button>
+                    </td>
+                    <td>${escapeHtml(t.name || '—')}</td>
+                    <td>${t.date || '—'}</td>
+                    <td>${record}</td>
+                    <td>${t.spread || 0}</td>
+                    <td>${t.place || '—'}</td>
+                    <td>${t.endRating || '—'}</td>
+                    <td ${changeClass}>${t.ratingChange > 0 ? `+${t.ratingChange}` : t.ratingChange || 0}</td>
+                </tr>
+                <tr class="collapse-row" id="${uniqueId}" style="display: none;">
+                    <td colspan="8"><div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-pulse"></i> Loading games...</div></td>
+                </tr>
+            `;
+        });
         
-        // Fetch and load games
-        await loadTournamentGames(playerId, tourneyId, btn, targetId, tournamentName, tournamentDate);
-      });
-    });
-  }
+        return `
+            <div style="overflow-x: auto; background: white; border-radius: 24px; padding: 0;">
+                <table class="tournament-table" style="width: 100%;">
+                    <thead>
+                        <tr><th></th><th>Tournament</th><th>Date</th><th>W-L-D</th><th>Spread</th><th>Place</th><th>End Rating</th><th>Change</th></tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
 
-  // Tab switching
-  function attachTabEvents() {
-    const btns = document.querySelectorAll('.tab-btn');
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetTab = btn.getAttribute('data-tab');
-        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-        btns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (targetTab === 'results') {
-          document.getElementById('resultsTab').classList.add('active');
-        } else if (targetTab === 'headtohead') {
-          document.getElementById('headtoheadTab').classList.add('active');
+    // Head-to-head placeholder (can be expanded later)
+    function buildHeadToHeadPlaceholder() {
+        return `
+            <div class="stats-grid" style="text-align: center; padding: 40px;">
+                <i class="fas fa-chart-line" style="font-size: 48px; color: #90b4d9; margin-bottom: 16px; display: block;"></i>
+                <h3>Head-to-Head Statistics</h3>
+                <p>Head-to-head data will be available in a future update.<br>
+                Click on any tournament above to see game-by-game results.</p>
+            </div>
+        `;
+    }
+
+    // Attach lazy-load event listeners
+    function attachLazyLoadEvents() {
+        document.querySelectorAll('.expand-btn').forEach(btn => {
+            // Remove existing listeners to avoid duplicates
+            btn.removeEventListener('click', btn._listener);
+            
+            const handler = async (e) => {
+                e.preventDefault();
+                const targetId = btn.getAttribute('data-target');
+                const tourneyId = btn.getAttribute('data-tourney');
+                const playerId = btn.getAttribute('data-player');
+                const tournamentName = btn.getAttribute('data-name');
+                const tournamentDate = btn.getAttribute('data-date');
+                const targetRow = document.getElementById(targetId);
+                
+                if (!targetRow) return;
+                
+                if (targetRow.style.display !== 'none') {
+                    targetRow.style.display = 'none';
+                    btn.innerHTML = '<i class="fas fa-plus-circle"></i> Details';
+                    return;
+                }
+                
+                if (btn.getAttribute('data-loaded') === 'true') {
+                    targetRow.style.display = 'table-row';
+                    btn.innerHTML = '<i class="fas fa-minus-circle"></i> Hide';
+                    return;
+                }
+                
+                targetRow.style.display = 'table-row';
+                await loadTournamentGames(playerId, tourneyId, btn, targetId, tournamentName, tournamentDate);
+            };
+            
+            btn._listener = handler;
+            btn.addEventListener('click', handler);
+        });
+    }
+
+    // Tab switching
+    function attachTabEvents() {
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach(btn => {
+            btn.removeEventListener('click', btn._tabListener);
+            const handler = () => {
+                const targetTab = btn.getAttribute('data-tab');
+                document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+                btns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if (targetTab === 'results') {
+                    document.getElementById('resultsTab').classList.add('active');
+                } else if (targetTab === 'headtohead') {
+                    document.getElementById('headtoheadTab').classList.add('active');
+                }
+            };
+            btn._tabListener = handler;
+            btn.addEventListener('click', handler);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Main initialization
+    async function initPage() {
+        const playerId = getPlayerIdFromUrl();
+        if (!playerId) {
+            document.getElementById('loadingView').innerHTML = `
+                <div class="error-box">
+                    <i class="fas fa-exclamation-triangle"></i> Missing player ID.<br>
+                    Use ?id=3039 in the URL.
+                </div>`;
+            return;
         }
-      });
-    });
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-
-  // Main initialization
-  async function initPage() {
-    const playerId = getPlayerIdFromUrl();
-    if (!playerId) {
-      document.getElementById('loadingView').innerHTML = `
-        <div class="error-box">
-          <i class="fas fa-exclamation-triangle"></i> Missing player ID.<br>
-          Use ?id=3039 in the URL.
-        </div>`;
-      return;
+        
+        try {
+            const data = await fetchPlayerSummary(playerId);
+            
+            const fullHtml = `
+                ${renderPlayerHeader(data)}
+                ${renderStatsGrid(data.stats)}
+                
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; gap: 12px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
+                        <button class="tab-btn active" data-tab="results">
+                            <i class="fas fa-table-list"></i> Tournament Results
+                        </button>
+                        <button class="tab-btn" data-tab="headtohead">
+                            <i class="fas fa-users"></i> Head to Head
+                        </button>
+                    </div>
+                    <div id="resultsTab" class="tab-pane active">
+                        ${buildTournamentsTable(data.tournaments, playerId)}
+                    </div>
+                    <div id="headtoheadTab" class="tab-pane">
+                        ${buildHeadToHeadPlaceholder()}
+                    </div>
+                </div>
+                
+                <div class="footer-note">
+                    <i class="fas fa-database"></i> Data powered by WESPA API v2 | 
+                    <i class="fas fa-mouse-pointer"></i> Click "Details" to load game-by-game results
+                </div>
+            `;
+            
+            document.getElementById('mainContent').innerHTML = fullHtml;
+            document.getElementById('loadingView').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            
+            attachLazyLoadEvents();
+            attachTabEvents();
+            
+        } catch (err) {
+            console.error(err);
+            document.getElementById('loadingView').innerHTML = `
+                <div class="error-box">
+                    <i class="fas fa-circle-exclamation"></i> Failed to load player data: ${err.message}<br>
+                    Make sure the API v2 endpoints are available.
+                </div>`;
+        }
     }
     
-    try {
-      const data = await fetchPlayerSummary(playerId);
-      
-      const fullHtml = `
-        ${renderPlayerHeader(data)}
-        ${renderStatsGrid(data.stats)}
-        
-        <div style="margin-bottom: 20px;">
-          <div style="display: flex; gap: 12px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
-            <button class="tab-btn active" data-tab="results" style="background: none; border: none; padding: 12px 24px; font-weight: 600; cursor: pointer; border-bottom: 3px solid #1f6392; color: #1f6392;">
-              <i class="fas fa-table-list"></i> Tournament Results
-            </button>
-            <button class="tab-btn" data-tab="headtohead" style="background: none; border: none; padding: 12px 24px; font-weight: 600; cursor: pointer; color: #5a6e8a;">
-              <i class="fas fa-users"></i> Head to Head
-            </button>
-          </div>
-          <div id="resultsTab" class="tab-pane active" style="display: block;">
-            ${buildTournamentsTable(data.tournaments, playerId)}
-          </div>
-          <div id="headtoheadTab" class="tab-pane" style="display: none;">
-            ${buildHeadToHeadPlaceholder()}
-          </div>
-        </div>
-        
-        <div class="footer-note">
-          <i class="fas fa-database"></i> Data powered by WESPA API | 
-          <i class="fas fa-mouse-pointer"></i> Click "Details" to load game-by-game results
-        </div>
-      `;
-      
-      document.getElementById('mainContent').innerHTML = fullHtml;
-      document.getElementById('loadingView').style.display = 'none';
-      document.getElementById('mainContent').style.display = 'block';
-      
-      attachLazyLoadEvents();
-      attachTabEvents();
-      
-    } catch (err) {
-      console.error(err);
-      document.getElementById('loadingView').innerHTML = `
-        <div class="error-box">
-          <i class="fas fa-circle-exclamation"></i> Failed to load player data: ${err.message}<br>
-          Make sure the API is accessible and CORS/proxy is configured.
-        </div>`;
-    }
-  }
-  
-  // Start the app
-  initPage();
+    // Start the app
+    initPage();
 </script>
 </body>
 </html>
