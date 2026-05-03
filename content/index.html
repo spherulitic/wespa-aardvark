@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>WESPA Stats | Search Players & Tournaments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- Header -->
+    <div class="query-header">
+        <h1><i class="fas fa-search"></i> WESPA Stats</h1>
+        <p>Search for players or tournaments</p>
+    </div>
+
+    <!-- Player Search -->
+    <div class="query-section">
+        <h2><i class="fas fa-user"></i> Player Search</h2>
+        <div class="card">
+            <div class="autocomplete-wrap">
+                <input
+                    type="text"
+                    id="playerSearchInput"
+                    placeholder="Start typing a player name..."
+                    autocomplete="off"
+                />
+                <div class="autocomplete-results" id="playerResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tournament Search -->
+    <div class="query-section">
+        <h2><i class="fas fa-trophy"></i> Tournament Search</h2>
+        <div class="card">
+            <div class="search-form">
+                <div class="form-group">
+                    <label for="tourneyName">Tournament Name</label>
+                    <input type="text" id="tourneyName" placeholder="e.g. World Championship" />
+                </div>
+                <div class="form-group">
+                    <label for="tourneyCountry">Country</label>
+                    <input type="text" id="tourneyCountry" placeholder="e.g. USA, GBR" maxlength="3" />
+                </div>
+                <div class="form-group">
+                    <label for="tourneyFrom">From Date</label>
+                    <input type="date" id="tourneyFrom" />
+                </div>
+                <div class="form-group">
+                    <label for="tourneyTo">To Date</label>
+                    <input type="date" id="tourneyTo" />
+                </div>
+                <div class="form-actions">
+                    <button class="btn-primary" id="tourneySearchBtn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button class="expand-btn" id="tourneyClearBtn">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="tourneyResults"></div>
+        <div id="tourneyLoader" class="loader" style="display:none;">
+            <i class="fas fa-spinner fa-pulse fa-2x"></i>
+            <p>Searching tournaments...</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-note">
+        Data sourced from WESPA (World English-Language Scrabble Players Association)
+    </div>
+</div>
+
+<script>
+    const API_BASE = '/api';
+
+    // ============================================================
+    // Player Autocomplete
+    // ============================================================
+
+    const playerInput = document.getElementById('playerSearchInput');
+    const playerResults = document.getElementById('playerResults');
+
+    let playerSearchTimer = null;
+    let playerSearchAbort = null;
+
+    playerInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        clearTimeout(playerSearchTimer);
+        playerResults.classList.remove('active');
+
+        if (query.length < 2) return;
+
+        playerSearchTimer = setTimeout(() => performPlayerSearch(query), 200);
+    });
+
+    playerInput.addEventListener('blur', function () {
+        // Delay hiding so click on result registers
+        setTimeout(() => playerResults.classList.remove('active'), 200);
+    });
+
+    playerInput.addEventListener('focus', function () {
+        if (this.value.trim().length >= 2) {
+            playerResults.classList.add('active');
+        }
+    });
+
+    async function performPlayerSearch(query) {
+        if (playerSearchAbort) playerSearchAbort.abort();
+        playerSearchAbort = new AbortController();
+
+        try {
+            const url = `${API_BASE}/players.php?search=${encodeURIComponent(query)}`;
+            const resp = await fetch(url, { signal: playerSearchAbort.signal });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+            const data = await resp.json();
+            const players = data.players || [];
+
+            renderPlayerResults(players);
+        } catch (err) {
+            if (err.name === 'AbortError') return;
+            console.error('Player search error:', err);
+        }
+    }
+
+    function renderPlayerResults(players) {
+        playerResults.innerHTML = '';
+
+        if (players.length === 0) {
+            playerResults.innerHTML = '<div class="autocomplete-item" style="color:#8ba0bc;">No players found</div>';
+            playerResults.classList.add('active');
+            return;
+        }
+
+        players.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.setAttribute('role', 'button');
+            item.tabIndex = 0;
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'player-name';
+            nameSpan.textContent = p.name;
+
+            const parts = [];
+
+            if (p.country) {
+                const flagImg = document.createElement('img');
+                flagImg.className = 'flag';
+                flagImg.src = `https://flagsapi.com/${p.country.toUpperCase()}/flat/64.png`;
+                flagImg.alt = p.country;
+                flagImg.loading = 'lazy';
+                parts.push(flagImg);
+            }
+
+            if (p.cswrating != null) {
+                const ratingSpan = document.createElement('span');
+                ratingSpan.className = 'player-rating';
+                ratingSpan.textContent = p.cswrating;
+                parts.push(ratingSpan);
+            }
+
+            item.appendChild(nameSpan);
+            parts.forEach(el => item.appendChild(el));
+
+            item.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                window.location.href = `player.html?id=${p.playerid}`;
+            });
+
+            item.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    window.location.href = `player.html?id=${p.playerid}`;
+                }
+            });
+
+            playerResults.appendChild(item);
+        });
+
+        playerResults.classList.add('active');
+    }
+
+    // ============================================================
+    // Tournament Search
+    // ============================================================
+
+    const tourneyName = document.getElementById('tourneyName');
+    const tourneyCountry = document.getElementById('tourneyCountry');
+    const tourneyFrom = document.getElementById('tourneyFrom');
+    const tourneyTo = document.getElementById('tourneyTo');
+    const tourneySearchBtn = document.getElementById('tourneySearchBtn');
+    const tourneyClearBtn = document.getElementById('tourneyClearBtn');
+    const tourneyResultsDiv = document.getElementById('tourneyResults');
+    const tourneyLoader = document.getElementById('tourneyLoader');
+
+    tourneySearchBtn.addEventListener('click', performTournamentSearch);
+    tourneyClearBtn.addEventListener('click', clearTournamentSearch);
+
+    // Also search on Enter in any text field
+    [tourneyName, tourneyCountry].forEach(el => {
+        el.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') performTournamentSearch();
+        });
+    });
+
+    async function performTournamentSearch() {
+        const params = new URLSearchParams();
+
+        const q = tourneyName.value.trim();
+        const country = tourneyCountry.value.trim().toUpperCase();
+        const from = tourneyFrom.value;
+        const to = tourneyTo.value;
+
+        if (q) params.set('q', q);
+        if (country) params.set('country', country);
+        if (from) params.set('from', from);
+        if (to) params.set('to', to);
+
+        if (!q && !country && !from && !to) {
+            showTourneyError('Please enter at least one search criteria.');
+            return;
+        }
+
+        tourneyResultsDiv.innerHTML = '';
+        tourneyLoader.style.display = 'block';
+        tourneySearchBtn.disabled = true;
+
+        try {
+            const url = `${API_BASE}/tournaments/search?${params.toString()}`;
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+            const data = await resp.json();
+            const tournaments = data.tournaments || [];
+
+            renderTournamentResults(tournaments);
+        } catch (err) {
+            console.error('Tournament search error:', err);
+            showTourneyError('An error occurred while searching. Please try again.');
+        } finally {
+            tourneyLoader.style.display = 'none';
+            tourneySearchBtn.disabled = false;
+        }
+    }
+
+    function renderTournamentResults(tournaments) {
+        tourneyResultsDiv.innerHTML = '';
+
+        if (tournaments.length === 0) {
+            tourneyResultsDiv.innerHTML = '<div class="empty-state"><i class="fas fa-trophy"></i> No tournaments found matching your criteria.</div>';
+            return;
+        }
+
+        const heading = document.createElement('p');
+        heading.style.marginBottom = '12px';
+        heading.style.color = '#5b6e8c';
+        heading.style.fontSize = '0.9rem';
+        heading.textContent = `${tournaments.length} tournament${tournaments.length !== 1 ? 's' : ''} found`;
+        tourneyResultsDiv.appendChild(heading);
+
+        tournaments.forEach(t => {
+            const card = document.createElement('a');
+            card.className = 'tourney-result-card';
+            card.href = `tournament.html?id=${t.tourneyid}`;
+            card.style.textDecoration = 'none';
+            card.style.color = 'inherit';
+            card.style.display = 'flex';
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'tourney-info';
+
+            const nameEl = document.createElement('div');
+            nameEl.style.fontWeight = '600';
+            nameEl.style.fontSize = '1.05rem';
+            nameEl.style.marginBottom = '4px';
+            nameEl.style.color = '#1e4663';
+            nameEl.textContent = t.name;
+
+            const metaEl = document.createElement('div');
+            metaEl.style.fontSize = '0.85rem';
+            metaEl.style.color = '#5b6e8c';
+            const parts = [];
+            if (t.start_date) parts.push(formatDate(t.start_date));
+            if (t.location) parts.push(t.location);
+            if (t.country) {
+                parts.push(`<img src="https://flagsapi.com/${t.country.toUpperCase()}/flat/64.png" alt="${t.country}" style="width:18px;height:auto;vertical-align:middle;border-radius:2px;margin-left:4px;"> ${t.country}`);
+            }
+            metaEl.innerHTML = parts.join(' &middot; ');
+
+            infoDiv.appendChild(nameEl);
+            infoDiv.appendChild(metaEl);
+
+            const arrow = document.createElement('div');
+            arrow.innerHTML = '<i class="fas fa-chevron-right" style="color:#c0d0e0;"></i>';
+
+            card.appendChild(infoDiv);
+            card.appendChild(arrow);
+            tourneyResultsDiv.appendChild(card);
+        });
+    }
+
+    function showTourneyError(msg) {
+        tourneyLoader.style.display = 'none';
+        tourneyResultsDiv.innerHTML = `<div class="error-box">${msg}</div>`;
+    }
+
+    function clearTournamentSearch() {
+        tourneyName.value = '';
+        tourneyCountry.value = '';
+        tourneyFrom.value = '';
+        tourneyTo.value = '';
+        tourneyResultsDiv.innerHTML = '';
+        tourneyLoader.style.display = 'none';
+        tourneySearchBtn.disabled = false;
+    }
+
+    // ============================================================
+    // Helpers
+    // ============================================================
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+</script>
+
+</body>
+</html>
