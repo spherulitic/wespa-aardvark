@@ -63,6 +63,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         /* Division Tabs (top level) */
@@ -250,16 +251,6 @@
             .standings-table th, .standings-table td { padding: 8px 6px; }
         }
 
-        .spinner {
-            display: inline-block;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .stat-rank {
             font-weight: 600;
             color: #1f6392;
@@ -319,17 +310,19 @@
         return await response.json();
     }
 
-    // Lazy-load statistics for a division
+    // FIXED: Convert from 0-indexed division (frontend) to 1-indexed (API)
     async function fetchDivisionStats(tournamentId, divisionIndex) {
-        const url = `${API_BASE}/v2/tournament/${tournamentId}/division/${divisionIndex}/stats`;
+        const divisionNumber = divisionIndex + 1;  // Convert to 1-indexed for API
+        const url = `${API_BASE}/v2/tournament/${tournamentId}/division/${divisionNumber}/stats`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
     }
 
-    // Lazy-load ratings for a division
+    // FIXED: Convert from 0-indexed division (frontend) to 1-indexed (API)
     async function fetchDivisionRatings(tournamentId, divisionIndex) {
-        const url = `${API_BASE}/v2/tournament/${tournamentId}/division/${divisionIndex}/ratings`;
+        const divisionNumber = divisionIndex + 1;  // Convert to 1-indexed for API
+        const url = `${API_BASE}/v2/tournament/${tournamentId}/division/${divisionNumber}/ratings`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
@@ -488,13 +481,11 @@
             return '<div class="empty-state">No statistics available.</div>';
         }
         
-        const columns = statType === 'upsets' 
-            ? ['Rank', 'Player', 'Player Rating', 'Opponent', 'Opponent Rating', 'Difference', 'Round']
-            : ['Rank', 'Player', 'Score', 'Opponent', 'Round'];
+        const isUpsets = statType === 'upsets';
         
         let rows = '';
         stats[statType].forEach(item => {
-            if (statType === 'upsets') {
+            if (isUpsets) {
                 rows += `
                     <tr>
                         <td class="stat-rank">${item.rank}</td>
@@ -503,6 +494,17 @@
                         <td><a href="player.html?id=${item.opponent_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.opponent_name)}</a></td>
                         <td>${item.opponent_rating}</td>
                         <td>${item.difference}</td>
+                        <td>${item.round}</td>
+                    </tr>
+                `;
+            } else if (statType === 'highCombined') {
+                rows += `
+                    <tr>
+                        <td class="stat-rank">${item.rank}</td>
+                        <td><a href="player.html?id=${item.player1_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player1_name)}</a></td>
+                        <td>vs</td>
+                        <td><a href="player.html?id=${item.player2_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player2_name)}</a></td>
+                        <td>${item.total_score}</td>
                         <td>${item.round}</td>
                     </tr>
                 `;
@@ -519,15 +521,20 @@
             }
         });
         
-        const headers = statType === 'upsets'
-            ? ['Rank', 'Player', 'Player Rating', 'Opponent', 'Opponent Rating', 'Difference', 'Round']
-            : ['Rank', 'Player', 'Score', 'Opponent', 'Round'];
+        let headers;
+        if (isUpsets) {
+            headers = ['Rank', 'Player', 'Player Rating', 'Opponent', 'Opponent Rating', 'Difference', 'Round'];
+        } else if (statType === 'highCombined') {
+            headers = ['Rank', 'Player 1', '', 'Player 2', 'Total Score', 'Round'];
+        } else {
+            headers = ['Rank', 'Player', 'Score', 'Opponent', 'Round'];
+        }
         
         return `
             <div style="overflow-x: auto;">
                 <table class="stats-table">
                     <thead>
-                        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</table>
                     </thead>
                     <tbody>
                         ${rows}
@@ -682,7 +689,7 @@
         // Division tab switching
         document.querySelectorAll('.division-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                const divisionIndex = tab.getAttribute('data-division');
+                const divisionIndex = parseInt(tab.getAttribute('data-division'));
                 document.querySelectorAll('.division-tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 document.querySelectorAll('.division-pane').forEach(pane => pane.classList.remove('active'));
@@ -699,8 +706,8 @@
         document.querySelectorAll('.sub-tab').forEach(tab => {
             tab.addEventListener('click', async () => {
                 const subtabId = tab.getAttribute('data-subtab');
-                const [tabType, divisionIndex] = subtabId.split('-');
-                const division = parseInt(divisionIndex);
+                const [tabType, divisionIndexStr] = subtabId.split('-');
+                const divisionIndex = parseInt(divisionIndexStr);
                 
                 // Update active state on sub-tabs
                 const parentContainer = tab.closest('.division-container');
@@ -709,20 +716,20 @@
                 
                 // Show the selected tab pane
                 parentContainer.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-                document.getElementById(`${tabType}-${division}`).classList.add('active');
+                document.getElementById(`${tabType}-${divisionIndex}`).classList.add('active');
                 
                 // Lazy-load content if needed
                 if (tabType === 'stats') {
-                    const statsElement = document.getElementById(`stats-${division}`);
+                    const statsElement = document.getElementById(`stats-${divisionIndex}`);
                     const placeholder = statsElement.querySelector('.stats-placeholder');
                     if (placeholder && placeholder.getAttribute('data-loaded') !== 'true') {
-                        await loadStatisticsTab(division, statsElement, tournamentId);
+                        await loadStatisticsTab(divisionIndex, statsElement, tournamentId);
                     }
                 } else if (tabType === 'ratings') {
-                    const ratingsElement = document.getElementById(`ratings-${division}`);
+                    const ratingsElement = document.getElementById(`ratings-${divisionIndex}`);
                     const placeholder = ratingsElement.querySelector('.ratings-placeholder');
                     if (placeholder && placeholder.getAttribute('data-loaded') !== 'true') {
-                        await loadRatingsTab(division, ratingsElement, tournamentId);
+                        await loadRatingsTab(divisionIndex, ratingsElement, tournamentId);
                     }
                 }
             });
