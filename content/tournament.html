@@ -41,7 +41,6 @@
             margin: 30px 0;
         }
 
-        /* Tournament Header */
         .tournament-header {
             background: white;
             border-radius: 28px;
@@ -66,7 +65,6 @@
             flex-wrap: wrap;
         }
 
-        /* Division Tabs (top level) */
         .division-tabs {
             display: flex;
             gap: 8px;
@@ -92,12 +90,12 @@
             border-bottom-color: #1f6392;
         }
 
-        /* Sub-tabs (Standings, Statistics, Ratings) */
         .sub-tabs {
             display: flex;
             gap: 4px;
             border-bottom: 1px solid #e2e8f0;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .sub-tab {
@@ -117,7 +115,6 @@
             border-bottom-color: #1f6392;
         }
 
-        /* Tables */
         .standings-table, .stats-table, .ratings-table {
             width: 100%;
             border-collapse: collapse;
@@ -276,23 +273,19 @@
 </div>
 
 <script>
-    // API endpoint (uses nginx reverse proxy)
     const API_BASE = '/api';
     
-    // Get tournament ID from URL (?id=43417)
     function getTournamentIdFromUrl() {
         const params = new URLSearchParams(window.location.search);
         return params.get('id') || params.get('tournament');
     }
     
-    // Get preselected division from URL
     function getPreselectedDivision() {
         const params = new URLSearchParams(window.location.search);
         const division = params.get('division');
         return division !== null ? parseInt(division) : 0;
     }
 
-    // Fetch tournament summary from v2 endpoint
     async function fetchTournamentSummary(tournamentId) {
         const url = `${API_BASE}/v2/tournament/${tournamentId}`;
         const response = await fetch(url);
@@ -302,7 +295,6 @@
         return data;
     }
 
-    // Reuse existing player games endpoint
     async function fetchPlayerGames(playerId, tourneyId) {
         const url = `${API_BASE}/v2/player/${playerId}/tournaments/${tourneyId}`;
         const response = await fetch(url);
@@ -310,25 +302,29 @@
         return await response.json();
     }
 
-    // FIXED: Convert from 0-indexed division (frontend) to 1-indexed (API)
     async function fetchDivisionStats(tournamentId, divisionIndex) {
-        const divisionNumber = divisionIndex + 1;  // Convert to 1-indexed for API
+        const divisionNumber = divisionIndex + 1;
         const url = `${API_BASE}/v2/tournament/${tournamentId}/division/${divisionNumber}/stats`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
+        const data = await response.json();
+        // Data comes directly as the stats object (no wrapper)
+        return data;
     }
 
-    // FIXED: Convert from 0-indexed division (frontend) to 1-indexed (API)
     async function fetchDivisionRatings(tournamentId, divisionIndex) {
-        const divisionNumber = divisionIndex + 1;  // Convert to 1-indexed for API
+        const divisionNumber = divisionIndex + 1;
         const url = `${API_BASE}/v2/tournament/${tournamentId}/division/${divisionNumber}/ratings`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
+        const data = await response.json();
+        // Handle both formats: direct array or object with ratings array
+        if (Array.isArray(data)) return data;
+        if (data && Array.isArray(data.ratings)) return data.ratings;
+        if (data && Array.isArray(data.Ratings)) return data.Ratings;
+        return [];
     }
 
-    // Calculate seed (rank by start rating within division)
     function calculateSeeds(standings) {
         const sorted = [...standings].sort((a, b) => b.startRating - a.startRating);
         const seedMap = new Map();
@@ -341,7 +337,6 @@
         }));
     }
 
-    // Generate rounds table HTML
     function generateRoundsTable(rounds, playerName) {
         if (!rounds || rounds.length === 0) {
             return '<div class="empty-state">No game data available for this tournament.</div>';
@@ -358,7 +353,7 @@
                         ${rounds.map(r => `
                             <tr>
                                 <td>${r.round}</td>
-                                <td><a href="player.html?id=${r.opponent_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(r.opponent_name)}</a></td>
+                                <td><a href="player.html?id=${r.opponent_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(r.opponent_name)}</a></td>
                                 <td>${r.opponent_rating || '—'}</td>
                                 <td class="${r.result === 'W' ? 'badge-win' : (r.result === 'L' ? 'badge-loss' : 'badge-draw')}">
                                     <strong>${r.result}</strong>
@@ -374,7 +369,6 @@
         `;
     }
 
-    // Load player games on demand (reusing existing endpoint)
     async function loadPlayerGames(playerId, tourneyId, playerName, buttonElement, targetRowId) {
         buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         buttonElement.disabled = true;
@@ -403,7 +397,6 @@
         }
     }
 
-    // Build standings table with expandable rows
     function buildStandingsTable(division, tourneyId) {
         if (!division.standings || division.standings.length === 0) {
             return '<div class="empty-state">No standings data available.</div>';
@@ -430,7 +423,7 @@
                     </td>
                     <td>${player.place || idx + 1}</td>
                     <td>${player.seed}</td>
-                    <td><a href="player.html?id=${player.playerid}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(player.name)}</a></td>
+                    <td><a href="player.html?id=${player.playerid}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(player.name)}</a></td>
                     <td class="wins-column">${player.wins}</td>
                     <td class="losses-column">${player.losses}</td>
                     <td>${player.byes || 0}</td>
@@ -475,23 +468,57 @@
         `;
     }
 
-    // Build statistics table
+    // Helper to deduplicate stats entries (remove duplicates where same game appears twice)
+    function deduplicateStats(statsArray) {
+        if (!statsArray || !Array.isArray(statsArray)) return [];
+        const seen = new Set();
+        return statsArray.filter(item => {
+            // Create a unique key based on round and player names (since each game appears twice with swapped players)
+            const round = item.round;
+            let key;
+            if (item.player_id && item.opponent_id) {
+                // For highWin, highLoss, highSpread - use smaller player_id first to create consistent key
+                const p1 = Math.min(item.player_id, item.opponent_id);
+                const p2 = Math.max(item.player_id, item.opponent_id);
+                key = `${round}-${p1}-${p2}`;
+            } else if (item.player1_id && item.player2_id) {
+                // For highCombined
+                const p1 = Math.min(item.player1_id, item.player2_id);
+                const p2 = Math.max(item.player1_id, item.player2_id);
+                key = `${round}-${p1}-${p2}`;
+            } else {
+                key = `${round}-${JSON.stringify(item)}`;
+            }
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
     function buildStatisticsTable(stats, statType) {
         if (!stats || !stats[statType] || stats[statType].length === 0) {
+            return '<div class="empty-state">No statistics available.</div>';
+        }
+        
+        // Deduplicate the stats array
+        const cleanedStats = deduplicateStats(stats[statType]);
+        
+        if (cleanedStats.length === 0) {
             return '<div class="empty-state">No statistics available.</div>';
         }
         
         const isUpsets = statType === 'upsets';
         
         let rows = '';
-        stats[statType].forEach(item => {
+        cleanedStats.forEach((item, displayRank) => {
+            const rank = displayRank + 1;
             if (isUpsets) {
                 rows += `
                     <tr>
-                        <td class="stat-rank">${item.rank}</td>
-                        <td><a href="player.html?id=${item.player_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player_name)}</a></td>
+                        <td class="stat-rank">${rank}</td>
+                        <td><a href="player.html?id=${item.player_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player_name)}</a></td>
                         <td>${item.player_rating}</td>
-                        <td><a href="player.html?id=${item.opponent_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.opponent_name)}</a></td>
+                        <td><a href="player.html?id=${item.opponent_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.opponent_name)}</a></td>
                         <td>${item.opponent_rating}</td>
                         <td>${item.difference}</td>
                         <td>${item.round}</td>
@@ -500,21 +527,32 @@
             } else if (statType === 'highCombined') {
                 rows += `
                     <tr>
-                        <td class="stat-rank">${item.rank}</td>
-                        <td><a href="player.html?id=${item.player1_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player1_name)}</a></td>
+                        <td class="stat-rank">${rank}</td>
+                        <td><a href="player.html?id=${item.player1_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player1_name)}</a></td>
                         <td>vs</td>
-                        <td><a href="player.html?id=${item.player2_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player2_name)}</a></td>
+                        <td><a href="player.html?id=${item.player2_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player2_name)}</a></td>
                         <td>${item.total_score}</td>
+                        <td>${item.round}</td>
+                    </tr>
+                `;
+            } else if (statType === 'highSpread') {
+                rows += `
+                    <tr>
+                        <td class="stat-rank">${rank}</td>
+                        <td><a href="player.html?id=${item.player_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player_name)}</a></td>
+                        <td>${item.score} - ${item.opponent_score}</td>
+                        <td>${item.spread}</td>
+                        <td><a href="player.html?id=${item.opponent_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.opponent_name)}</a></td>
                         <td>${item.round}</td>
                     </tr>
                 `;
             } else {
                 rows += `
                     <tr>
-                        <td class="stat-rank">${item.rank}</td>
-                        <td><a href="player.html?id=${item.player_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player_name)}</a></td>
+                        <td class="stat-rank">${rank}</td>
+                        <td><a href="player.html?id=${item.player_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player_name)}</a></td>
                         <td>${item.score}</td>
-                        <td><a href="player.html?id=${item.opponent_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.opponent_name)}</a></td>
+                        <td><a href="player.html?id=${item.opponent_id}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.opponent_name)}</a></td>
                         <td>${item.round}</td>
                     </tr>
                 `;
@@ -523,9 +561,11 @@
         
         let headers;
         if (isUpsets) {
-            headers = ['Rank', 'Player', 'Player Rating', 'Opponent', 'Opponent Rating', 'Difference', 'Round'];
+            headers = ['Rank', 'Player', 'Rating', 'Opponent', 'Opp Rating', 'Difference', 'Round'];
         } else if (statType === 'highCombined') {
             headers = ['Rank', 'Player 1', '', 'Player 2', 'Total Score', 'Round'];
+        } else if (statType === 'highSpread') {
+            headers = ['Rank', 'Player', 'Score', 'Spread', 'Opponent', 'Round'];
         } else {
             headers = ['Rank', 'Player', 'Score', 'Opponent', 'Round'];
         }
@@ -534,7 +574,7 @@
             <div style="overflow-x: auto;">
                 <table class="stats-table">
                     <thead>
-                        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</table>
+                        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
                     </thead>
                     <tbody>
                         ${rows}
@@ -544,7 +584,6 @@
         `;
     }
 
-    // Build ratings table
     function buildRatingsTable(ratings) {
         if (!ratings || ratings.length === 0) {
             return '<div class="empty-state">No ratings data available.</div>';
@@ -559,7 +598,7 @@
             
             rows += `
                 <tr>
-                    <td><a href="player.html?id=${r.playerid}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(r.name)}</a></td>
+                    <td><a href="player.html?id=${r.playerid}" target="_self" style="color: #1f6392; text-decoration: none;">${escapeHtml(r.name)}</a></td>
                     <td>${expWins}</td>
                     <td class="${actWins >= expWins ? 'wins-column' : 'losses-column'}">${actWins}</td>
                     <td>${r.oldWorldRank || '—'}</td>
@@ -602,7 +641,6 @@
         `;
     }
 
-    // Load statistics tab content (lazy)
     async function loadStatisticsTab(divisionIndex, statElement, tournamentId) {
         if (statElement.getAttribute('data-loaded') === 'true') return;
         
@@ -624,7 +662,6 @@
             statElement.innerHTML = statsHtml;
             statElement.setAttribute('data-loaded', 'true');
             
-            // Attach stat sub-tab events
             document.querySelectorAll('#stat-subtabs .sub-tab').forEach(tab => {
                 tab.addEventListener('click', (e) => {
                     const statType = tab.getAttribute('data-stat');
@@ -643,7 +680,6 @@
         }
     }
 
-    // Load ratings tab content (lazy)
     async function loadRatingsTab(divisionIndex, ratingsElement, tournamentId) {
         if (ratingsElement.getAttribute('data-loaded') === 'true') return;
         
@@ -659,7 +695,6 @@
         }
     }
 
-    // Build division HTML with lazy-loading sub-tabs
     function buildDivisionHtml(division, divisionIndex, tournamentId) {
         const divisionName = division.name || `Division ${divisionIndex + 1}`;
         
@@ -684,9 +719,7 @@
         `;
     }
 
-    // Attach all event listeners
     function attachEvents(tournamentId, divisions) {
-        // Division tab switching
         document.querySelectorAll('.division-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const divisionIndex = parseInt(tab.getAttribute('data-division'));
@@ -695,30 +728,25 @@
                 document.querySelectorAll('.division-pane').forEach(pane => pane.classList.remove('active'));
                 document.getElementById(`division-${divisionIndex}`).classList.add('active');
                 
-                // Update URL without reload
                 const url = new URL(window.location);
                 url.searchParams.set('division', divisionIndex);
                 window.history.pushState({}, '', url);
             });
         });
         
-        // Sub-tab switching within divisions
         document.querySelectorAll('.sub-tab').forEach(tab => {
             tab.addEventListener('click', async () => {
                 const subtabId = tab.getAttribute('data-subtab');
                 const [tabType, divisionIndexStr] = subtabId.split('-');
                 const divisionIndex = parseInt(divisionIndexStr);
                 
-                // Update active state on sub-tabs
                 const parentContainer = tab.closest('.division-container');
                 parentContainer.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 
-                // Show the selected tab pane
                 parentContainer.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
                 document.getElementById(`${tabType}-${divisionIndex}`).classList.add('active');
                 
-                // Lazy-load content if needed
                 if (tabType === 'stats') {
                     const statsElement = document.getElementById(`stats-${divisionIndex}`);
                     const placeholder = statsElement.querySelector('.stats-placeholder');
@@ -735,7 +763,6 @@
             });
         });
         
-        // Expand/collapse player rows
         document.querySelectorAll('.expand-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -775,7 +802,6 @@
         });
     }
 
-    // Main initialization
     async function initPage() {
         const tournamentId = getTournamentIdFromUrl();
         if (!tournamentId) {
@@ -792,7 +818,6 @@
         try {
             const data = await fetchTournamentSummary(tournamentId);
             
-            // Build division tabs
             let divisionTabsHtml = '<div class="division-tabs">';
             let divisionsHtml = '';
             data.divisions.forEach((division, idx) => {
@@ -843,7 +868,6 @@
         }
     }
     
-    // Start the app
     initPage();
 </script>
 </body>

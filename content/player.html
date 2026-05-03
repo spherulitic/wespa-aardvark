@@ -476,7 +476,7 @@
                             <i class="fas fa-plus-circle"></i> Details
                         </button>
                     </td>
-                    <td>${escapeHtml(t.name || '—')}</td>
+         	    <td><a href="tournament.html?id=${t.tourneyid}" style="color: #1f6392; text-decoration: none;">${escapeHtml(t.name || '—')}</a></td>
                     <td>${t.date || '—'}</td>
                     <td>${record}</td>
                     <td>${t.spread || 0}</td>
