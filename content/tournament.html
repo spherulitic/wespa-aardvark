@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>WESPA Tournament | Dynamic Tournament Stats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fc;
+            color: #1e2a3e;
+            line-height: 1.5;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2rem;
+            color: #2c5f8a;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            border-left: 6px solid #c00;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 30px 0;
+        }
+
+        /* Tournament Header */
+        .tournament-header {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+            padding: 24px 28px;
+            margin-bottom: 28px;
+        }
+
+        .tournament-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e4663;
+            margin-bottom: 8px;
+        }
+
+        .tournament-date {
+            color: #5b6e8c;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Division Tabs (top level) */
+        .division-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .division-tab {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #5a6e8a;
+            border-bottom: 3px solid transparent;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+
+        .division-tab.active {
+            color: #1f6392;
+            border-bottom-color: #1f6392;
+        }
+
+        /* Sub-tabs (Standings, Statistics, Ratings) */
+        .sub-tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .sub-tab {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #5a6e8a;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .sub-tab.active {
+            color: #1f6392;
+            border-bottom-color: #1f6392;
+        }
+
+        /* Tables */
+        .standings-table, .stats-table, .ratings-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .standings-table th, .stats-table th, .ratings-table th {
+            text-align: left;
+            padding: 14px 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e0e9f0;
+            background: #fafcff;
+        }
+
+        .standings-table td, .stats-table td, .ratings-table td {
+            padding: 12px;
+            border-bottom: 1px solid #edf2f7;
+            vertical-align: top;
+        }
+
+        .standings-table tr:hover, .stats-table tr:hover, .ratings-table tr:hover {
+            background: #f8fafd;
+        }
+
+        .expand-btn {
+            background: #eef2ff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.1s;
+            color: #1f6392;
+        }
+
+        .expand-btn:hover {
+            background: #dfe6f5;
+        }
+
+        .expand-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .rounds-table {
+            width: 100%;
+            margin-top: 12px;
+            background: #fafcff;
+            border-radius: 16px;
+            overflow: hidden;
+            font-size: 0.8rem;
+        }
+
+        .rounds-table th, .rounds-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2edf2;
+        }
+
+        .collapse-row {
+            display: none;
+        }
+
+        .badge-win {
+            color: #2b7a3e;
+            font-weight: 700;
+        }
+
+        .badge-loss {
+            color: #bc4e2c;
+        }
+
+        .badge-draw {
+            color: #e68a2e;
+        }
+
+        .wins-column {
+            font-weight: 600;
+            color: #2b7a3e;
+        }
+
+        .losses-column {
+            font-weight: 600;
+            color: #bc4e2c;
+        }
+
+        .rating-change-positive {
+            color: #2b7a3e;
+            font-weight: 600;
+        }
+
+        .rating-change-negative {
+            color: #bc4e2c;
+            font-weight: 600;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .division-pane {
+            display: none;
+        }
+
+        .division-pane.active {
+            display: block;
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6c86a3;
+            border-top: 1px solid #e0e9f0;
+            padding-top: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .app-container { padding: 16px; }
+            .tournament-name { font-size: 1.4rem; }
+            .standings-table, .stats-table, .ratings-table { font-size: 0.7rem; }
+            .standings-table th, .standings-table td { padding: 8px 6px; }
+        }
+
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-rank {
+            font-weight: 600;
+            color: #1f6392;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #8ba0bc;
+            background: white;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+    <div id="loadingView" class="loader">
+        <i class="fas fa-spinner fa-pulse fa-2x"></i>
+        <p>Loading tournament data...</p>
+    </div>
+    <div id="mainContent" style="display: none;"></div>
+</div>
+
+<script>
+    // API endpoint (uses nginx reverse proxy)
+    const API_BASE = '/api';
+    
+    // Get tournament ID from URL (?id=43417)
+    function getTournamentIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id') || params.get('tournament');
+    }
+    
+    // Get preselected division from URL
+    function getPreselectedDivision() {
+        const params = new URLSearchParams(window.location.search);
+        const division = params.get('division');
+        return division !== null ? parseInt(division) : 0;
+    }
+
+    // Fetch tournament summary from v2 endpoint
+    async function fetchTournamentSummary(tournamentId) {
+        const url = `${API_BASE}/v2/tournament/${tournamentId}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const data = await response.json();
+        if (!data || !data.tourneyid) throw new Error('Invalid tournament data');
+        return data;
+    }
+
+    // Reuse existing player games endpoint
+    async function fetchPlayerGames(playerId, tourneyId) {
+        const url = `${API_BASE}/v2/player/${playerId}/tournaments/${tourneyId}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        return await response.json();
+    }
+
+    // Lazy-load statistics for a division
+    async function fetchDivisionStats(tournamentId, divisionIndex) {
+        const url = `${API_BASE}/v2/tournament/${tournamentId}/division/${divisionIndex}/stats`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+    }
+
+    // Lazy-load ratings for a division
+    async function fetchDivisionRatings(tournamentId, divisionIndex) {
+        const url = `${API_BASE}/v2/tournament/${tournamentId}/division/${divisionIndex}/ratings`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+    }
+
+    // Calculate seed (rank by start rating within division)
+    function calculateSeeds(standings) {
+        const sorted = [...standings].sort((a, b) => b.startRating - a.startRating);
+        const seedMap = new Map();
+        sorted.forEach((player, idx) => {
+            seedMap.set(player.playerid, idx + 1);
+        });
+        return standings.map(player => ({
+            ...player,
+            seed: seedMap.get(player.playerid)
+        }));
+    }
+
+    // Generate rounds table HTML
+    function generateRoundsTable(rounds, playerName) {
+        if (!rounds || rounds.length === 0) {
+            return '<div class="empty-state">No game data available for this tournament.</div>';
+        }
+        
+        return `
+            <div style="padding: 16px; background: #f9fafb; border-radius: 12px;">
+                <strong>${escapeHtml(playerName)} - Round Details</strong>
+                <table class="rounds-table" style="width:100%; margin-top: 12px;">
+                    <thead>
+                        <tr><th>Round</th><th>Opponent</th><th>Opponent Rating</th><th>Result</th><th>Score</th><th>Opp Score</th><th>Player Rating</th></tr>
+                    </thead>
+                    <tbody>
+                        ${rounds.map(r => `
+                            <tr>
+                                <td>${r.round}</td>
+                                <td><a href="player.html?id=${r.opponent_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(r.opponent_name)}</a></td>
+                                <td>${r.opponent_rating || '—'}</td>
+                                <td class="${r.result === 'W' ? 'badge-win' : (r.result === 'L' ? 'badge-loss' : 'badge-draw')}">
+                                    <strong>${r.result}</strong>
+                                </td>
+                                <td>${r.score_for}</td>
+                                <td>${r.score_against}</td>
+                                <td>${r.player_rating_at_time || '—'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // Load player games on demand (reusing existing endpoint)
+    async function loadPlayerGames(playerId, tourneyId, playerName, buttonElement, targetRowId) {
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        buttonElement.disabled = true;
+        
+        try {
+            const data = await fetchPlayerGames(playerId, tourneyId);
+            const roundsHtml = generateRoundsTable(data.rounds, playerName);
+            const targetRow = document.getElementById(targetRowId);
+            if (targetRow) {
+                targetRow.innerHTML = `<td colspan="12">${roundsHtml}</td>`;
+            }
+            
+            buttonElement.innerHTML = '<i class="fas fa-minus-circle"></i>';
+            buttonElement.disabled = false;
+            buttonElement.setAttribute('data-loaded', 'true');
+            
+        } catch (error) {
+            console.error('Error loading player games:', error);
+            buttonElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            buttonElement.disabled = false;
+            
+            const targetRow = document.getElementById(targetRowId);
+            if (targetRow && targetRow.innerHTML.includes('Loading')) {
+                targetRow.innerHTML = `<td colspan="12"><div class="error-box" style="margin: 10px;">Failed to load games: ${error.message}</div></td>`;
+            }
+        }
+    }
+
+    // Build standings table with expandable rows
+    function buildStandingsTable(division, tourneyId) {
+        if (!division.standings || division.standings.length === 0) {
+            return '<div class="empty-state">No standings data available.</div>';
+        }
+        
+        const standingsWithSeeds = calculateSeeds(division.standings);
+        let rows = '';
+        
+        standingsWithSeeds.forEach((player, idx) => {
+            const uniqueId = `player-${player.playerid}-${tourneyId}`;
+            const ratingChangeClass = player.ratingChange >= 0 ? 'rating-change-positive' : 'rating-change-negative';
+            const ratingChangeDisplay = player.ratingChange >= 0 ? `+${player.ratingChange}` : player.ratingChange;
+            
+            rows += `
+                <tr>
+                    <td>
+                        <button class="expand-btn" 
+                                data-player="${player.playerid}"
+                                data-tourney="${tourneyId}"
+                                data-target="${uniqueId}"
+                                data-name="${escapeHtml(player.name)}">
+                            <i class="fas fa-plus-circle"></i>
+                        </button>
+                    </td>
+                    <td>${player.place || idx + 1}</td>
+                    <td>${player.seed}</td>
+                    <td><a href="player.html?id=${player.playerid}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(player.name)}</a></td>
+                    <td class="wins-column">${player.wins}</td>
+                    <td class="losses-column">${player.losses}</td>
+                    <td>${player.byes || 0}</td>
+                    <td>${player.spread}</td>
+                    <td>${player.startRating}</td>
+                    <td>${player.endRating}</td>
+                    <td class="${ratingChangeClass}">${ratingChangeDisplay}</td>
+                    <td>${player.startDeviation || '—'}</td>
+                    <td>${player.endDeviation || '—'}</td>
+                </tr>
+                <tr class="collapse-row" id="${uniqueId}" style="display: none;">
+                    <td colspan="12"><div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-pulse"></i> Loading games...</div></td>
+                </tr>
+            `;
+        });
+        
+        return `
+            <div style="overflow-x: auto;">
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Place</th>
+                            <th>Seed</th>
+                            <th>Name</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Byes</th>
+                            <th>Spread</th>
+                            <th>Start Rating</th>
+                            <th>End Rating</th>
+                            <th>Change</th>
+                            <th>Start Dev</th>
+                            <th>End Dev</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // Build statistics table
+    function buildStatisticsTable(stats, statType) {
+        if (!stats || !stats[statType] || stats[statType].length === 0) {
+            return '<div class="empty-state">No statistics available.</div>';
+        }
+        
+        const columns = statType === 'upsets' 
+            ? ['Rank', 'Player', 'Player Rating', 'Opponent', 'Opponent Rating', 'Difference', 'Round']
+            : ['Rank', 'Player', 'Score', 'Opponent', 'Round'];
+        
+        let rows = '';
+        stats[statType].forEach(item => {
+            if (statType === 'upsets') {
+                rows += `
+                    <tr>
+                        <td class="stat-rank">${item.rank}</td>
+                        <td><a href="player.html?id=${item.player_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player_name)}</a></td>
+                        <td>${item.player_rating}</td>
+                        <td><a href="player.html?id=${item.opponent_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.opponent_name)}</a></td>
+                        <td>${item.opponent_rating}</td>
+                        <td>${item.difference}</td>
+                        <td>${item.round}</td>
+                    </tr>
+                `;
+            } else {
+                rows += `
+                    <tr>
+                        <td class="stat-rank">${item.rank}</td>
+                        <td><a href="player.html?id=${item.player_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.player_name)}</a></td>
+                        <td>${item.score}</td>
+                        <td><a href="player.html?id=${item.opponent_id}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(item.opponent_name)}</a></td>
+                        <td>${item.round}</td>
+                    </tr>
+                `;
+            }
+        });
+        
+        const headers = statType === 'upsets'
+            ? ['Rank', 'Player', 'Player Rating', 'Opponent', 'Opponent Rating', 'Difference', 'Round']
+            : ['Rank', 'Player', 'Score', 'Opponent', 'Round'];
+        
+        return `
+            <div style="overflow-x: auto;">
+                <table class="stats-table">
+                    <thead>
+                        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // Build ratings table
+    function buildRatingsTable(ratings) {
+        if (!ratings || ratings.length === 0) {
+            return '<div class="empty-state">No ratings data available.</div>';
+        }
+        
+        let rows = '';
+        ratings.forEach(r => {
+            const ratingChangeClass = r.ratingChange >= 0 ? 'rating-change-positive' : 'rating-change-negative';
+            const ratingChangeDisplay = r.ratingChange >= 0 ? `+${r.ratingChange}` : r.ratingChange;
+            const actWins = r.actualWins !== undefined ? r.actualWins : r.wins;
+            const expWins = r.expectedWins !== undefined ? r.expectedWins : '-';
+            
+            rows += `
+                <tr>
+                    <td><a href="player.html?id=${r.playerid}" target="_blank" style="color: #1f6392; text-decoration: none;">${escapeHtml(r.name)}</a></td>
+                    <td>${expWins}</td>
+                    <td class="${actWins >= expWins ? 'wins-column' : 'losses-column'}">${actWins}</td>
+                    <td>${r.oldWorldRank || '—'}</td>
+                    <td>${r.newWorldRank || '—'}</td>
+                    <td>${r.oldNationRank || '—'}</td>
+                    <td>${r.newNationRank || '—'}</td>
+                    <td>${r.startRating}</td>
+                    <td class="${ratingChangeClass}">${ratingChangeDisplay}</td>
+                    <td>${r.endRating}</td>
+                    <td>${r.startDeviation || '—'}</td>
+                    <td>${r.endDeviation || '—'}</td>
+                </tr>
+            `;
+        });
+        
+        return `
+            <div style="overflow-x: auto;">
+                <table class="ratings-table">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Exp Wins</th>
+                            <th>Act Wins</th>
+                            <th>Old World Rank</th>
+                            <th>New World Rank</th>
+                            <th>Old Nation Rank</th>
+                            <th>New Nation Rank</th>
+                            <th>Start Rating</th>
+                            <th>Change</th>
+                            <th>End Rating</th>
+                            <th>Start Dev</th>
+                            <th>End Dev</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // Load statistics tab content (lazy)
+    async function loadStatisticsTab(divisionIndex, statElement, tournamentId) {
+        if (statElement.getAttribute('data-loaded') === 'true') return;
+        
+        statElement.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-pulse"></i> Loading statistics...</div>';
+        
+        try {
+            const stats = await fetchDivisionStats(tournamentId, divisionIndex);
+            const statTypes = ['highWin', 'highLoss', 'highSpread', 'highCombined', 'upsets'];
+            let statsHtml = '<div class="sub-tabs" id="stat-subtabs">';
+            statsHtml += '<button class="sub-tab active" data-stat="highWin">High Win</button>';
+            statsHtml += '<button class="sub-tab" data-stat="highLoss">High Loss</button>';
+            statsHtml += '<button class="sub-tab" data-stat="highSpread">High Spread</button>';
+            statsHtml += '<button class="sub-tab" data-stat="highCombined">High Combined</button>';
+            statsHtml += '<button class="sub-tab" data-stat="upsets">Upsets</button>';
+            statsHtml += '</div><div id="stat-content">';
+            statsHtml += buildStatisticsTable(stats, 'highWin');
+            statsHtml += '</div>';
+            
+            statElement.innerHTML = statsHtml;
+            statElement.setAttribute('data-loaded', 'true');
+            
+            // Attach stat sub-tab events
+            document.querySelectorAll('#stat-subtabs .sub-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const statType = tab.getAttribute('data-stat');
+                    document.querySelectorAll('#stat-subtabs .sub-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const contentDiv = document.getElementById('stat-content');
+                    if (contentDiv) {
+                        contentDiv.innerHTML = buildStatisticsTable(stats, statType);
+                    }
+                });
+            });
+            
+        } catch (error) {
+            console.error('Error loading statistics:', error);
+            statElement.innerHTML = `<div class="error-box">Failed to load statistics: ${error.message}</div>`;
+        }
+    }
+
+    // Load ratings tab content (lazy)
+    async function loadRatingsTab(divisionIndex, ratingsElement, tournamentId) {
+        if (ratingsElement.getAttribute('data-loaded') === 'true') return;
+        
+        ratingsElement.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-pulse"></i> Loading ratings...</div>';
+        
+        try {
+            const ratings = await fetchDivisionRatings(tournamentId, divisionIndex);
+            ratingsElement.innerHTML = buildRatingsTable(ratings);
+            ratingsElement.setAttribute('data-loaded', 'true');
+        } catch (error) {
+            console.error('Error loading ratings:', error);
+            ratingsElement.innerHTML = `<div class="error-box">Failed to load ratings: ${error.message}</div>`;
+        }
+    }
+
+    // Build division HTML with lazy-loading sub-tabs
+    function buildDivisionHtml(division, divisionIndex, tournamentId) {
+        const divisionName = division.name || `Division ${divisionIndex + 1}`;
+        
+        return `
+            <div class="division-container" data-division="${divisionIndex}">
+                <h3 style="margin-bottom: 20px; color: #1e4663;">${escapeHtml(divisionName)}</h3>
+                <div class="sub-tabs">
+                    <button class="sub-tab active" data-subtab="standings-${divisionIndex}">Standings</button>
+                    <button class="sub-tab" data-subtab="stats-${divisionIndex}">Statistics</button>
+                    <button class="sub-tab" data-subtab="ratings-${divisionIndex}">Ratings</button>
+                </div>
+                <div id="standings-${divisionIndex}" class="tab-pane active">
+                    ${buildStandingsTable(division, tournamentId)}
+                </div>
+                <div id="stats-${divisionIndex}" class="tab-pane">
+                    <div class="stats-placeholder" data-loaded="false">Click Statistics tab to load...</div>
+                </div>
+                <div id="ratings-${divisionIndex}" class="tab-pane">
+                    <div class="ratings-placeholder" data-loaded="false">Click Ratings tab to load...</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Attach all event listeners
+    function attachEvents(tournamentId, divisions) {
+        // Division tab switching
+        document.querySelectorAll('.division-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const divisionIndex = tab.getAttribute('data-division');
+                document.querySelectorAll('.division-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.division-pane').forEach(pane => pane.classList.remove('active'));
+                document.getElementById(`division-${divisionIndex}`).classList.add('active');
+                
+                // Update URL without reload
+                const url = new URL(window.location);
+                url.searchParams.set('division', divisionIndex);
+                window.history.pushState({}, '', url);
+            });
+        });
+        
+        // Sub-tab switching within divisions
+        document.querySelectorAll('.sub-tab').forEach(tab => {
+            tab.addEventListener('click', async () => {
+                const subtabId = tab.getAttribute('data-subtab');
+                const [tabType, divisionIndex] = subtabId.split('-');
+                const division = parseInt(divisionIndex);
+                
+                // Update active state on sub-tabs
+                const parentContainer = tab.closest('.division-container');
+                parentContainer.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show the selected tab pane
+                parentContainer.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+                document.getElementById(`${tabType}-${division}`).classList.add('active');
+                
+                // Lazy-load content if needed
+                if (tabType === 'stats') {
+                    const statsElement = document.getElementById(`stats-${division}`);
+                    const placeholder = statsElement.querySelector('.stats-placeholder');
+                    if (placeholder && placeholder.getAttribute('data-loaded') !== 'true') {
+                        await loadStatisticsTab(division, statsElement, tournamentId);
+                    }
+                } else if (tabType === 'ratings') {
+                    const ratingsElement = document.getElementById(`ratings-${division}`);
+                    const placeholder = ratingsElement.querySelector('.ratings-placeholder');
+                    if (placeholder && placeholder.getAttribute('data-loaded') !== 'true') {
+                        await loadRatingsTab(division, ratingsElement, tournamentId);
+                    }
+                }
+            });
+        });
+        
+        // Expand/collapse player rows
+        document.querySelectorAll('.expand-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const targetId = btn.getAttribute('data-target');
+                const playerId = btn.getAttribute('data-player');
+                const tourneyId = btn.getAttribute('data-tourney');
+                const playerName = btn.getAttribute('data-name');
+                const targetRow = document.getElementById(targetId);
+                
+                if (!targetRow) return;
+                
+                if (targetRow.style.display !== 'none') {
+                    targetRow.style.display = 'none';
+                    btn.innerHTML = '<i class="fas fa-plus-circle"></i>';
+                    return;
+                }
+                
+                if (btn.getAttribute('data-loaded') === 'true') {
+                    targetRow.style.display = 'table-row';
+                    btn.innerHTML = '<i class="fas fa-minus-circle"></i>';
+                    return;
+                }
+                
+                targetRow.style.display = 'table-row';
+                await loadPlayerGames(playerId, tourneyId, playerName, btn, targetId);
+            });
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Main initialization
+    async function initPage() {
+        const tournamentId = getTournamentIdFromUrl();
+        if (!tournamentId) {
+            document.getElementById('loadingView').innerHTML = `
+                <div class="error-box">
+                    <i class="fas fa-exclamation-triangle"></i> Missing tournament ID.<br>
+                    Use ?id=43417 in the URL.
+                </div>`;
+            return;
+        }
+        
+        const preselectedDivision = getPreselectedDivision();
+        
+        try {
+            const data = await fetchTournamentSummary(tournamentId);
+            
+            // Build division tabs
+            let divisionTabsHtml = '<div class="division-tabs">';
+            let divisionsHtml = '';
+            data.divisions.forEach((division, idx) => {
+                const divisionName = division.name || `Division ${idx + 1}`;
+                const isActive = idx === preselectedDivision;
+                divisionTabsHtml += `
+                    <button class="division-tab ${isActive ? 'active' : ''}" data-division="${idx}">
+                        ${escapeHtml(divisionName)}
+                    </button>
+                `;
+                divisionsHtml += `
+                    <div id="division-${idx}" class="division-pane ${isActive ? 'active' : ''}">
+                        ${buildDivisionHtml(division, idx, tournamentId)}
+                    </div>
+                `;
+            });
+            divisionTabsHtml += '</div>';
+            
+            const fullHtml = `
+                <div class="tournament-header">
+                    <div class="tournament-name">${escapeHtml(data.name)}</div>
+                    <div class="tournament-date">
+                        <i class="far fa-calendar-alt"></i> ${data.date}
+                        ${data.location ? `<span><i class="fas fa-map-marker-alt"></i> ${escapeHtml(data.location)}</span>` : ''}
+                    </div>
+                </div>
+                ${divisionTabsHtml}
+                ${divisionsHtml}
+                <div class="footer-note">
+                    <i class="fas fa-database"></i> Data powered by WESPA API v2 | 
+                    <i class="fas fa-mouse-pointer"></i> Click <i class="fas fa-plus-circle"></i> to load player game details
+                </div>
+            `;
+            
+            document.getElementById('mainContent').innerHTML = fullHtml;
+            document.getElementById('loadingView').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            
+            attachEvents(tournamentId, data.divisions);
+            
+        } catch (err) {
+            console.error(err);
+            document.getElementById('loadingView').innerHTML = `
+                <div class="error-box">
+                    <i class="fas fa-circle-exclamation"></i> Failed to load tournament data: ${err.message}<br>
+                    Make sure the API v2 endpoints are available.
+                </div>`;
+        }
+    }
+    
+    // Start the app
+    initPage();
+</script>
+</body>
+</html>
