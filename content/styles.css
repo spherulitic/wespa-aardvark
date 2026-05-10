@@ -198,6 +198,163 @@ a:hover {
     padding-top: 24px;
 }
 
+/* ===== Rankings Page ===== */
+
+.rankings-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+    max-width: 440px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-wrap .search-icon {
+    position: absolute;
+    left: 16px;
+    color: #a0b4cc;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+.search-wrap input {
+    width: 100%;
+    padding: 12px 18px 12px 42px;
+    border: 2px solid #e0e9f0;
+    border-radius: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s;
+    background: white;
+}
+
+.search-wrap input:focus {
+    border-color: #1f6392;
+}
+
+.search-wrap input::placeholder {
+    color: #a0b4cc;
+}
+
+.pagination-info {
+    font-size: 0.85rem;
+    color: #5b6e8c;
+    white-space: nowrap;
+}
+
+.col-rank {
+    width: 60px;
+    text-align: center;
+}
+
+.col-name {
+    min-width: 180px;
+}
+
+.col-country {
+    width: 130px;
+}
+
+.col-rating {
+    width: 90px;
+    text-align: center;
+}
+
+.col-games {
+    width: 80px;
+    text-align: center;
+}
+
+.col-last {
+    width: 130px;
+    text-align: center;
+}
+
+td.col-rank {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+td.col-name a {
+    font-weight: 500;
+}
+
+td.col-country {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rankings-flag {
+    width: 22px;
+    height: auto;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+td.col-rating {
+    font-weight: 600;
+    color: #1f6392;
+}
+
+td.col-games,
+td.col-last {
+    color: #5b6e8c;
+}
+
+.rankings-footer {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.pagination-buttons span {
+    font-size: 0.85rem;
+    color: #5b6e8c;
+    min-width: 120px;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .rankings-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-wrap {
+        max-width: 100%;
+    }
+    .pagination-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .col-country,
+    .col-last {
+        display: none;
+    }
+    td.col-country,
+    td.col-last {
+        display: none;
+    }
+}
+
 /* ===== Spinner ===== */
 
 .spinner {

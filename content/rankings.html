@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>WESPA Rankings | Player Rankings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-container">
+
+    <div class="query-header">
+        <h1><i class="fas fa-trophy"></i> WESPA Rankings</h1>
+        <p id="latestTournament">Loading latest tournament info...</p>
+    </div>
+
+    <div class="card">
+        <div class="rankings-controls">
+            <div class="search-wrap">
+                <i class="fas fa-search search-icon"></i>
+                <input
+                    type="text"
+                    id="playerSearchInput"
+                    placeholder="Find a player by name..."
+                    autocomplete="off"
+                />
+                <button class="expand-btn" id="clearSearchBtn" style="display:none;">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+            <div class="pagination-info" id="paginationInfo">
+                <span id="pageIndicator">Page 1 of ...</span>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-rank">#</th>
+                        <th class="col-name">Player</th>
+                        <th class="col-country">Country</th>
+                        <th class="col-rating">Rating</th>
+                        <th class="col-games">Games</th>
+                        <th class="col-last">Last Played</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingsBody">
+                    <tr id="loadingRow">
+                        <td colspan="6" class="loader">
+                            <i class="fas fa-spinner fa-pulse"></i> Loading rankings...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="rankings-footer">
+            <div class="pagination-buttons">
+                <button class="btn-primary" id="prevPageBtn" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="pageIndicatorFooter">Page 1 of ...</span>
+                <button class="btn-primary" id="nextPageBtn" disabled>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        Data sourced from WESPA (World English-Language Scrabble Players Association)
+    </div>
+</div>
+
+<script>
+    const API_BASE = '/api';
+    const PER_PAGE = 50;
+
+    let currentPage = 1;
+    let totalPages = 0;
+    let totalPlayers = 0;
+    let searchQuery = '';
+    let isJumpingToPlayer = false;
+
+    const rankingsBody = document.getElementById('rankingsBody');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+    const pageIndicatorFooter = document.getElementById('pageIndicatorFooter');
+    const playerSearchInput = document.getElementById('playerSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const latestTournament = document.getElementById('latestTournament');
+
+    // ============================================================
+    // Latest Tournament Info
+    // ============================================================
+
+    async function loadLatestTournament() {
+        try {
+            const res = await fetch(`${API_BASE}/v2/rankings/latest-tournament`);
+            if (!res.ok) throw new Error('Failed to load');
+            const data = await res.json();
+            latestTournament.textContent = `Most recent tournament: ${data.name} (${data.date})`;
+        } catch {
+            latestTournament.textContent = 'Could not load latest tournament info.';
+        }
+    }
+
+    // ============================================================
+    // Rankings Fetch & Render
+    // ============================================================
+
+    async function loadRankings(page, search) {
+        rankingsBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="loader">
+                    <i class="fas fa-spinner fa-pulse"></i> Loading rankings...
+                </td>
+            </tr>
+        `;
+
+        try {
+            let url = `${API_BASE}/v2/rankings?page=${page}&per_page=${PER_PAGE}`;
+            if (search) {
+                url += `&search=${encodeURIComponent(search)}`;
+            }
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Failed to load rankings');
+            const data = await res.json();
+
+            currentPage = data.page;
+            totalPages = data.total_pages;
+            totalPlayers = data.total;
+
+            renderTable(data.players);
+            updatePagination();
+        } catch {
+            rankingsBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="error-box">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Failed to load rankings. Please try again later.
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function renderTable(players) {
+        if (!players || players.length === 0) {
+            rankingsBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class="fas fa-users" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
+                        No players found.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        for (const p of players) {
+            const flagUrl = `https://flagsapi.com/${p.country}/flat/24.png`;
+            html += `
+                <tr>
+                    <td class="col-rank">${p.rank}</td>
+                    <td class="col-name">
+                        <a href="player.html?id=${p.playerid}">${escapeHtml(p.name)}</a>
+                    </td>
+                    <td class="col-country">
+                        <img src="${flagUrl}"
+                             alt="${p.country}"
+                             class="rankings-flag"
+                             loading="lazy"
+                             onerror="this.style.display='none'"
+                        />
+                        ${p.country}
+                    </td>
+                    <td class="col-rating">${p.rating}</td>
+                    <td class="col-games">${p.total_games}</td>
+                    <td class="col-last">${p.last_played || '—'}</td>
+                </tr>
+            `;
+        }
+        rankingsBody.innerHTML = html;
+    }
+
+    function updatePagination() {
+        const text = `Page ${currentPage} of ${totalPages}`;
+        pageIndicator.textContent = text;
+        pageIndicatorFooter.textContent = `(${totalPlayers} total players)`;
+
+        prevPageBtn.disabled = currentPage <= 1;
+        nextPageBtn.disabled = currentPage >= totalPages;
+    }
+
+    // ============================================================
+    // Pagination Controls
+    // ============================================================
+
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadRankings(currentPage, searchQuery);
+        }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadRankings(currentPage, searchQuery);
+        }
+    });
+
+    // ============================================================
+    // Search / Jump to Player
+    // ============================================================
+
+    let searchTimer = null;
+
+    playerSearchInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        clearTimeout(searchTimer);
+
+        if (query.length === 0) {
+            clearSearchBtn.style.display = 'none';
+            searchQuery = '';
+            currentPage = 1;
+            loadRankings(1, '');
+            return;
+        }
+
+        clearSearchBtn.style.display = 'inline-block';
+
+        searchTimer = setTimeout(() => {
+            searchQuery = query;
+            isJumpingToPlayer = true;
+            loadRankings(1, query);
+        }, 400);
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+        playerSearchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        searchQuery = '';
+        currentPage = 1;
+        loadRankings(1, '');
+        playerSearchInput.focus();
+    });
+
+    // Keyboard: Enter to jump
+    playerSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = playerSearchInput.value.trim();
+            if (query.length > 0) {
+                searchQuery = query;
+                isJumpingToPlayer = true;
+                loadRankings(1, query);
+            }
+        }
+    });
+
+    // ============================================================
+    // Utility
+    // ============================================================
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ============================================================
+    // Init
+    // ============================================================
+
+    loadLatestTournament();
+    loadRankings(1, '');
+</script>
+
+</body>
+</html>
