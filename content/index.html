@@ -76,7 +76,7 @@
         <h2><i class="fas fa-trophy"></i> Rankings</h2>
         <div class="card">
             <p style="margin-bottom:16px;color:#5b6e8c;">
-                Browse the full WESPA player rankings, 50 at a time, with search.
+                Browse the full WESPA player rankings
             </p>
             <a href="rankings.html" class="btn-primary" style="display:inline-block;text-decoration:none;">
                 <i class="fas fa-list"></i> View Rankings
@@ -303,7 +303,7 @@
             if (t.start_date) parts.push(formatDate(t.start_date));
             if (t.location) parts.push(t.location);
             if (t.country) {
-                parts.push(`<img src="https://flagsapi.com/${t.country.toUpperCase()}/flat/64.png" alt="${t.country}" style="width:18px;height:auto;vertical-align:middle;border-radius:2px;margin-left:4px;"> ${t.country}`);
+                parts.push(`<img src="https://wespa.xerafin.net/flags/${t.country.toUpperCase()}.png" alt="${t.country}" style="width:18px;height:auto;vertical-align:middle;border-radius:2px;margin-left:4px;"> ${t.country}`);
             }
             metaEl.innerHTML = parts.join(' &middot; ');
 
