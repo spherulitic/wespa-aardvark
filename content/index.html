@@ -94,60 +94,140 @@
     const API_BASE = '/api';
 
     // ============================================================
-    // Player Autocomplete
+    // Player Autocomplete (Client-Side Cache)
     // ============================================================
 
     const playerInput = document.getElementById('playerSearchInput');
     const playerResults = document.getElementById('playerResults');
 
-    let playerSearchTimer = null;
-    let playerSearchAbort = null;
+    // In-memory player list: array of { playerid, name, lowerName }
+    let allPlayers = [];
 
-    playerInput.addEventListener('input', function () {
-        const query = this.value.trim();
-        clearTimeout(playerSearchTimer);
-        playerResults.classList.remove('active');
+    const CACHE_KEY = 'wespa_player_list';
+    const VERSION_KEY = 'wespa_data_version';
 
-        if (query.length < 2) return;
+    // ---- Load the player list into memory ----
+    async function loadPlayerCache() {
+        // Try restoring from localStorage first
+        const cached = localStorage.getItem(CACHE_KEY);
+        const cachedVersion = localStorage.getItem(VERSION_KEY);
 
-        playerSearchTimer = setTimeout(() => performPlayerSearch(query), 200);
-    });
+        if (cached && cachedVersion) {
+            try {
+                const parsed = JSON.parse(cached);
+                allPlayers = parsed.map(p => ({
+                    playerid: p.playerid,
+                    name: p.name,
+                    lowerName: p.name.toLowerCase(),
+                    country: p.country || null,
+                    cswrating: p.cswrating != null ? p.cswrating : null
+                }));
+                console.log(`Loaded ${allPlayers.length} players from cache (version: ${cachedVersion})`);
 
-    playerInput.addEventListener('blur', function () {
-        // Delay hiding so click on result registers
-        setTimeout(() => playerResults.classList.remove('active'), 200);
-    });
+                // Now check if the data is still fresh
+                const fresh = await checkDataFreshness(cachedVersion);
+                if (fresh) return; // cache is still valid
 
-    playerInput.addEventListener('focus', function () {
-        if (this.value.trim().length >= 2) {
-            playerResults.classList.add('active');
+                console.log('Data is stale, re-fetching...');
+            } catch (e) {
+                console.warn('Player cache corrupted, re-fetching');
+            }
         }
-    });
 
-    async function performPlayerSearch(query) {
-        if (playerSearchAbort) playerSearchAbort.abort();
-        playerSearchAbort = new AbortController();
+        // Fetch from API
+        await fetchAndCachePlayers();
+    }
 
+    async function checkDataFreshness(storedVersion) {
         try {
-            const url = `${API_BASE}/players.php?search=${encodeURIComponent(query)}`;
-            const resp = await fetch(url, { signal: playerSearchAbort.signal });
+            const resp = await fetch(`${API_BASE}/v2/rankings/latest-tournament`);
+            if (!resp.ok) {
+                // If endpoint fails, assume stale isn't critical — keep cache
+                return true;
+            }
+
+            const data = await resp.json();
+            // Use the latest tournament date as our version identifier
+            const latestVersion = data.date || 'unknown';
+
+            // Also store the latest tournament name/date for reference
+            return storedVersion === latestVersion;
+        } catch (err) {
+            console.warn('Failed to check data freshness:', err);
+            // Network issue — keep the cached data
+            return true;
+        }
+    }
+
+    async function fetchAndCachePlayers() {
+        try {
+            const resp = await fetch(`${API_BASE}/players.php?idsonly=1`);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
             const data = await resp.json();
             const players = data.players || [];
 
-            renderPlayerResults(players);
+            // Build in-memory list with lowercased names for fast search
+            allPlayers = players.map(p => ({
+                playerid: p.playerid,
+                name: p.name,
+                lowerName: p.name.toLowerCase(),
+                country: p.country || null,
+                cswrating: p.cswrating != null ? p.cswrating : null
+            }));
+
+            // Get the latest tournament date as version identifier
+            let version = null;
+            try {
+                const vresp = await fetch(`${API_BASE}/v2/rankings/latest-tournament`);
+                if (vresp.ok) {
+                    const vdata = await vresp.json();
+                    version = vdata.date || null;
+                }
+            } catch (_) {}
+
+            // Persist to localStorage
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify(players));
+                if (version) {
+                    localStorage.setItem(VERSION_KEY, version);
+                }
+            } catch (e) {
+                console.warn('Could not cache players to localStorage', e);
+            }
+
+            console.log(`Fetched ${allPlayers.length} players from API`);
         } catch (err) {
-            if (err.name === 'AbortError') return;
-            console.error('Player search error:', err);
+            console.error('Failed to fetch player list:', err);
         }
     }
 
-    function renderPlayerResults(players) {
+    // ---- Local search (instant, <1ms) ----
+    function searchLocal(query) {
+        const lower = query.toLowerCase();
+        const results = [];
+        for (let i = 0; i < allPlayers.length; i++) {
+            const p = allPlayers[i];
+            if (p.lowerName.includes(lower)) {
+                results.push({
+                    playerid: p.playerid,
+                    name: p.name,
+                    country: p.country,
+                    cswrating: p.cswrating
+                });
+                // Stop at a reasonable limit
+                if (results.length >= 200) break;
+            }
+        }
+        return results;
+    }
+
+    // ---- Render autocomplete results ----
+    function renderPlayerResults(players, query) {
         playerResults.innerHTML = '';
 
         if (players.length === 0) {
-            playerResults.innerHTML = '<div class="autocomplete-item" style="color:#8ba0bc;">No players found</div>';
+            playerResults.innerHTML = `<div class="autocomplete-item" style="color:#8ba0bc;">No players matching "${escapeHtml(query)}"</div>`;
             playerResults.classList.add('active');
             return;
         }
@@ -161,8 +241,7 @@
             const nameSpan = document.createElement('span');
             nameSpan.className = 'player-name';
             nameSpan.textContent = p.name;
-
-            const parts = [];
+            item.appendChild(nameSpan);
 
             if (p.country) {
                 const flagImg = document.createElement('img');
@@ -170,18 +249,15 @@
                 flagImg.src = `https://wespa.xerafin.net/flags/${p.country.toUpperCase()}.png`;
                 flagImg.alt = p.country;
                 flagImg.loading = 'lazy';
-                parts.push(flagImg);
+                item.appendChild(flagImg);
             }
 
             if (p.cswrating != null) {
                 const ratingSpan = document.createElement('span');
                 ratingSpan.className = 'player-rating';
                 ratingSpan.textContent = p.cswrating;
-                parts.push(ratingSpan);
+                item.appendChild(ratingSpan);
             }
-
-            item.appendChild(nameSpan);
-            parts.forEach(el => item.appendChild(el));
 
             item.addEventListener('mousedown', function (e) {
                 e.preventDefault();
@@ -199,6 +275,36 @@
 
         playerResults.classList.add('active');
     }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ---- Input handler (no debounce needed — instant) ----
+    playerInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        playerResults.classList.remove('active');
+
+        if (query.length < 2) return;
+
+        const results = searchLocal(query);
+        renderPlayerResults(results, query);
+    });
+
+    playerInput.addEventListener('blur', function () {
+        setTimeout(() => playerResults.classList.remove('active'), 200);
+    });
+
+    playerInput.addEventListener('focus', function () {
+        if (this.value.trim().length >= 2) {
+            playerResults.classList.add('active');
+        }
+    });
+
+    // ---- Kick off cache load on page load ----
+    loadPlayerCache();
 
     // ============================================================
     // Tournament Search
