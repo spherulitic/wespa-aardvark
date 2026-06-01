@@ -446,7 +446,7 @@
             const roundsHtml = generateRoundsTable(data.rounds, tournamentName, tournamentDate);
             const targetRow = document.getElementById(targetRowId);
             if (targetRow) {
-                targetRow.innerHTML = `<td colspan="8">${roundsHtml}</td>`;
+                targetRow.innerHTML = `<td colspan="10">${roundsHtml}</td>`;
             }
             
             buttonElement.innerHTML = '<i class="fas fa-minus-circle"></i> Hide';
@@ -460,7 +460,7 @@
             
             const targetRow = document.getElementById(targetRowId);
             if (targetRow && targetRow.innerHTML.includes('Loading')) {
-                targetRow.innerHTML = `<td colspan="8"><div class="error-box" style="margin: 10px;">Failed to load games: ${error.message}</div></td>`;
+                targetRow.innerHTML = `<td colspan="10"><div class="error-box" style="margin: 10px;">Failed to load games: ${error.message}</div></td>`;
             }
         }
     }
@@ -493,12 +493,14 @@
                     <td>${t.date || '—'}</td>
                     <td>${record}</td>
                     <td>${t.spread || 0}</td>
+                    <td>${t.averageScore || '—'}</td>
+                    <td>${t.averageAgainst || '—'}</td>
                     <td>${t.place || '—'}</td>
                     <td>${t.endRating || '—'}</td>
                     <td ${changeClass}>${t.ratingChange > 0 ? `+${t.ratingChange}` : t.ratingChange || 0}</td>
                 </tr>
                 <tr class="collapse-row" id="${uniqueId}" style="display: none;">
-                    <td colspan="8"><div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-pulse"></i> Loading games...</div></td>
+                    <td colspan="10"><div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-pulse"></i> Loading games...</div></td>
                 </tr>
             `;
         });
@@ -507,7 +509,7 @@
             <div style="overflow-x: auto; background: white; border-radius: 24px; padding: 0;">
                 <table class="tournament-table" style="width: 100%;">
                     <thead>
-                        <tr><th></th><th>Tournament</th><th>Date</th><th>W-L-B</th><th>Spread</th><th>Place</th><th>End Rating</th><th>Change</th></tr>
+                        <tr><th></th><th>Tournament</th><th>Date</th><th>W-L-B</th><th>Spread</th><th>Avg For</th><th>Avg Against</th><th>Place</th><th>End Rating</th><th>Change</th></tr>
                     </thead>
                     <tbody>
                         ${rows}
