@@ -1,289 +1,431 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>WESPA Rankings | Player Rankings</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WESPA Rankings</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+	body {
+		margin: 0;
+		font-family: 'Montserrat', Arial, sans-serif;
+		background: #f4f7fb;
+		color: #1f2d3d;
+		font-weight: 400;
+	}
+
+	h1 {
+		margin-bottom: 4px;
+		color: #163b5c;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+    .subtext {
+        color: #66788a;
+        margin-bottom: 20px;
+    }
+
+    .toolbar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    input, select {
+        padding: 10px 12px;
+        border: 1px solid #cfd9e6;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    input {
+        flex: 1;
+        min-width: 240px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    th, td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #edf1f5;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    th {
+        background: #163b5c;
+        color: white;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+    }
+
+    tr:hover {
+        background: #f7fbff;
+    }
+
+    .rank {
+        width: 60px;
+        font-weight: bold;
+        color: #163b5c;
+    }
+
+    .rating {
+        font-weight: 700;
+    }
+
+    .muted {
+        color: #66788a;
+    }
+
+    .status {
+        margin: 12px 0;
+        color: #66788a;
+    }
+
+    .error {
+        padding: 16px;
+        background: #ffecec;
+        border: 1px solid #ffb3b3;
+        color: #8a1f1f;
+        border-radius: 6px;
+    }
+
+    @media (max-width: 700px) {
+        .container {
+            padding: 14px;
+        }
+
+        table {
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 8px;
+        }
+
+        .hide-mobile {
+            display: none;
+        }
+		.explainer {
+			font-size: 0.95rem;
+			color: #66788a;
+			margin-bottom: 4px;
+		}
+
+		.last-updated {
+			font-size: 0.78rem;
+			color: #8a9aad;
+		}
+    }
+</style>
 </head>
+
 <body>
+<div class="container">
+    <h1>WESPA Rankings</h1>
+    <div class="subtext" id="summary">Loading latest rankings...</div>
 
-<div class="app-container">
-
-    <div class="query-header">
-        <h1><i class="fas fa-trophy"></i> WESPA Rankings</h1>
-        <p id="latestTournament">Loading latest tournament info...</p>
+    <div class="toolbar">
+        <input id="searchBox" type="text" placeholder="Search player, country, or code..." />
+        <select id="countryFilter">
+            <option value="">All countries</option>
+        </select>
     </div>
 
-    <div class="card">
-        <div class="rankings-controls">
-            <div class="search-wrap">
-                <i class="fas fa-search search-icon"></i>
-                <input
-                    type="text"
-                    id="playerSearchInput"
-                    placeholder="Find a player by name..."
-                    autocomplete="off"
-                />
-                <button class="expand-btn" id="clearSearchBtn" style="display:none;">
-                    <i class="fas fa-times"></i> Clear
-                </button>
-            </div>
-            <div class="pagination-info" id="paginationInfo">
-                <span id="pageIndicator">Page 1 of ...</span>
-            </div>
-        </div>
+    <div class="status" id="status"></div>
 
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="col-rank">#</th>
-                        <th class="col-name">Player</th>
-                        <th class="col-country">Country</th>
-                        <th class="col-rating">Rating</th>
-                        <th class="col-games">Games</th>
-                        <th class="col-last">Last Played</th>
-                    </tr>
-                </thead>
-                <tbody id="rankingsBody">
-                    <tr id="loadingRow">
-                        <td colspan="6" class="loader">
-                            <i class="fas fa-spinner fa-pulse"></i> Loading rankings...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="rankings-footer">
-            <div class="pagination-buttons">
-                <button class="btn-primary" id="prevPageBtn" disabled>
-                    <i class="fas fa-chevron-left"></i> Previous
-                </button>
-                <span id="pageIndicatorFooter">Page 1 of ...</span>
-                <button class="btn-primary" id="nextPageBtn" disabled>
-                    Next <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer-note">
-        Data sourced from WESPA (World English-Language Scrabble Players Association)
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th data-sort="rank">Rank</th>
+                <th data-sort="code">Code</th>
+                <th data-sort="name">Name</th>
+                <th data-sort="country">Country</th>
+                <th data-sort="rating">Rating</th>
+                <th data-sort="games" class="hide-mobile">Games</th>
+                <th data-sort="lastPlayed" class="hide-mobile">Last Played</th>
+            </tr>
+        </thead>
+        <tbody id="rankingsBody"></tbody>
+    </table>
 </div>
 
 <script>
-    const API_BASE = '/api';
-    const PER_PAGE = 50;
+const SOURCE_FILE = 'latest.txt';
+const API_BASE = '/api'; // Reverse-proxied through nginx to wespa-api.xerafin.net
+const MIN_GAMES = 50;
+const ACTIVE_DAYS = 730;
 
-    let currentPage = 1;
-    let totalPages = 0;
-    let totalPlayers = 0;
-    let searchQuery = '';
-    let isJumpingToPlayer = false;
+let allPlayers = [];
+let filteredPlayers = [];
+let sortKey = 'rank';
+let sortAsc = true;
+let playerIdMap = null; // { name_lower: playerId } — fetched from API
 
-    const rankingsBody = document.getElementById('rankingsBody');
-    const prevPageBtn = document.getElementById('prevPageBtn');
-    const nextPageBtn = document.getElementById('nextPageBtn');
-    const pageIndicator = document.getElementById('pageIndicator');
-    const pageIndicatorFooter = document.getElementById('pageIndicatorFooter');
-    const playerSearchInput = document.getElementById('playerSearchInput');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-    const latestTournament = document.getElementById('latestTournament');
+const summary = document.getElementById('summary');
+const statusEl = document.getElementById('status');
+const rankingsBody = document.getElementById('rankingsBody');
+const searchBox = document.getElementById('searchBox');
+const countryFilter = document.getElementById('countryFilter');
 
-    // ============================================================
-    // Latest Tournament Info
-    // ============================================================
+loadPlayerIdMap().then(() => loadRankings());
 
-    async function loadLatestTournament() {
-        try {
-            const res = await fetch(`${API_BASE}/v2/rankings/latest-tournament`);
-            if (!res.ok) throw new Error('Failed to load');
-            const data = await res.json();
-            latestTournament.textContent = `Most recent tournament: ${data.name} (${data.date})`;
-        } catch {
-            latestTournament.textContent = 'Could not load latest tournament info.';
+async function loadPlayerIdMap() {
+    try {
+        const resp = await fetch(`${API_BASE}/players.php?idsonly=1`, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`Failed to fetch player IDs: HTTP ${resp.status}`);
+        const data = await resp.json();
+        const map = {};
+        for (const p of data.players) {
+            map[p.name.toLowerCase().trim()] = p.playerid;
         }
+        playerIdMap = map;
+    } catch (err) {
+        console.error('Could not load player ID map:', err);
+        // Continue without player links — non-critical
+        playerIdMap = {};
+    }
+}
+
+async function loadRankings() {
+    try {
+        const resp = await fetch(SOURCE_FILE, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`Unable to load ${SOURCE_FILE}: HTTP ${resp.status}`);
+
+        const text = await resp.text();
+        const parsed = parseLatestTxt(text);
+
+        allPlayers = parsed.players;
+        populateCountryFilter(allPlayers);
+
+		summary.innerHTML = `
+			<div class="explainer">
+				Showing players active within 2 years with at least ${MIN_GAMES} rated games.
+			</div>
+			<div class="last-updated">
+				Last updated: ${formatDate(parsed.snapshotDate)}
+			</div>
+		`;
+        applyFilters();
+    } catch (err) {
+        console.error(err);
+        summary.innerHTML = `<div class="error">${err.message}</div>`;
+    }
+}
+
+function parseLatestTxt(text) {
+    const lines = text.split(/\r?\n/).filter(line => line.trim());
+
+    if (lines.length === 0) {
+        return { snapshotDate: new Date(), players: [] };
     }
 
-    // ============================================================
-    // Rankings Fetch & Render
-    // ============================================================
+    const header = lines[0];
+    const headerDateMatch = header.match(/(\d{8})\s*$/);
+    const snapshotDate = headerDateMatch
+        ? parseYYYYMMDD(headerDateMatch[1])
+        : new Date();
 
-    async function loadRankings(page, search) {
-        rankingsBody.innerHTML = `
-            <tr>
-                <td colspan="6" class="loader">
-                    <i class="fas fa-spinner fa-pulse"></i> Loading rankings...
-                </td>
-            </tr>
+    const cutoff = new Date(snapshotDate);
+    cutoff.setDate(cutoff.getDate() - ACTIVE_DAYS);
+
+    const players = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const p = parsePlayerLine(lines[i]);
+        if (!p) continue;
+
+        if (p.games < MIN_GAMES) continue;
+        if (p.lastPlayed < cutoff) continue;
+
+        players.push(p);
+    }
+
+    // latest.txt is already rating-sorted, but sort again for safety.
+    players.sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
+
+    players.forEach((p, idx) => {
+        p.rank = idx + 1;
+    });
+
+    return { snapshotDate, players };
+}
+
+function parsePlayerLine(line) {
+    /*
+      Expected fixed-width format:
+      0-3   code
+      5-7   country
+      9-28  name
+      then: games rating lastPlayed class title markers
+    */
+
+    if (line.length < 45) return null;
+
+    const code = line.slice(0, 4).trim();
+    const country = line.slice(5, 8).trim();
+    const name = line.slice(9, 30).trim();
+    const rest = line.slice(29).trim();
+
+    const parts = rest.split(/\s+/);
+
+    if (parts.length < 3) return null;
+
+    const games = Number(parts[0]);
+    const rating = Number(parts[1]);
+    const lastPlayedRaw = parts[2];
+
+    if (!code || !country || !name) return null;
+    if (!Number.isFinite(games) || !Number.isFinite(rating)) return null;
+    if (!/^\d{8}$/.test(lastPlayedRaw)) return null;
+
+    return {
+        code,
+        country,
+        name,
+        games,
+        rating,
+        lastPlayedRaw,
+        lastPlayed: parseYYYYMMDD(lastPlayedRaw)
+    };
+}
+
+function parseYYYYMMDD(s) {
+    const year = Number(s.slice(0, 4));
+    const month = Number(s.slice(4, 6)) - 1;
+    const day = Number(s.slice(6, 8));
+    return new Date(year, month, day);
+}
+
+function formatDate(d) {
+    if (!(d instanceof Date) || isNaN(d)) return '';
+    return d.toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+function populateCountryFilter(players) {
+    const countries = [...new Set(players.map(p => p.country))].sort();
+
+    for (const c of countries) {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        countryFilter.appendChild(opt);
+    }
+}
+
+function applyFilters() {
+    const q = searchBox.value.trim().toLowerCase();
+    const country = countryFilter.value;
+
+    filteredPlayers = allPlayers.filter(p => {
+        const matchesSearch =
+            !q ||
+            p.name.toLowerCase().includes(q) ||
+            p.code.toLowerCase().includes(q) ||
+            p.country.toLowerCase().includes(q);
+
+        const matchesCountry = !country || p.country === country;
+
+        return matchesSearch && matchesCountry;
+    });
+
+    sortPlayers();
+    renderTable();
+}
+
+function sortPlayers() {
+    filteredPlayers.sort((a, b) => {
+        let av = a[sortKey];
+        let bv = b[sortKey];
+
+        if (sortKey === 'lastPlayed') {
+            av = av.getTime();
+            bv = bv.getTime();
+        }
+
+        if (typeof av === 'string') {
+            return sortAsc
+                ? av.localeCompare(bv)
+                : bv.localeCompare(av);
+        }
+
+        return sortAsc ? av - bv : bv - av;
+    });
+}
+
+function renderTable() {
+    rankingsBody.innerHTML = '';
+
+    statusEl.textContent =
+        `${filteredPlayers.length} player${filteredPlayers.length === 1 ? '' : 's'} shown`;
+
+    for (const p of filteredPlayers) {
+        const tr = document.createElement('tr');
+
+        const playerId = playerIdMap && playerIdMap[p.name.toLowerCase().trim()];
+        const nameHtml = playerId
+            ? `<a href="player.html?id=${playerId}" style="color: #1f6392; text-decoration: none; font-weight: 500;">${escapeHtml(p.name)}</a>`
+            : escapeHtml(p.name);
+
+        tr.innerHTML = `
+            <td class="rank">${p.rank}</td>
+            <td>${escapeHtml(p.code)}</td>
+            <td>${nameHtml}</td>
+            <td>${escapeHtml(p.country)}</td>
+            <td class="rating">${p.rating}</td>
+            <td class="hide-mobile">${p.games}</td>
+            <td class="hide-mobile">${formatDate(p.lastPlayed)}</td>
         `;
 
-        try {
-            let url = `${API_BASE}/v2/rankings?page=${page}&per_page=${PER_PAGE}`;
-            if (search) {
-                url += `&search=${encodeURIComponent(search)}`;
-            }
-
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('Failed to load rankings');
-            const data = await res.json();
-
-            currentPage = data.page;
-            totalPages = data.total_pages;
-            totalPlayers = data.total;
-
-            renderTable(data.players);
-            updatePagination();
-        } catch {
-            rankingsBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="error-box">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Failed to load rankings. Please try again later.
-                    </td>
-                </tr>
-            `;
-        }
+        rankingsBody.appendChild(tr);
     }
+}
 
-    function renderTable(players) {
-        if (!players || players.length === 0) {
-            rankingsBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="empty-state">
-                        <i class="fas fa-users" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
-                        No players found.
-                    </td>
-                </tr>
-            `;
-            return;
+function escapeHtml(s) {
+    return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+searchBox.addEventListener('input', applyFilters);
+countryFilter.addEventListener('change', applyFilters);
+
+document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+        const key = th.dataset.sort;
+
+        if (sortKey === key) {
+            sortAsc = !sortAsc;
+        } else {
+            sortKey = key;
+            sortAsc = key === 'name' || key === 'country' || key === 'code';
         }
 
-        let html = '';
-        for (const p of players) {
-            const flagUrl = `flags/${p.country}.png`;
-            html += `
-                <tr>
-                    <td class="col-rank">${p.rank}</td>
-                    <td class="col-name">
-                        <a href="player.html?id=${p.playerid}">${escapeHtml(p.name)}</a>
-                    </td>
-                    <td class="col-country">
-                        <img src="${flagUrl}"
-                             alt="${p.country}"
-                             class="rankings-flag"
-                             loading="lazy"
-                             onerror="this.style.display='none'"
-                        />
-                        ${p.country}
-                    </td>
-                    <td class="col-rating">${p.rating}</td>
-                    <td class="col-games">${p.total_games}</td>
-                    <td class="col-last">${p.last_played || '—'}</td>
-                </tr>
-            `;
-        }
-        rankingsBody.innerHTML = html;
-    }
-
-    function updatePagination() {
-        const text = `Page ${currentPage} of ${totalPages}`;
-        pageIndicator.textContent = text;
-        pageIndicatorFooter.textContent = `(${totalPlayers} total players)`;
-
-        prevPageBtn.disabled = currentPage <= 1;
-        nextPageBtn.disabled = currentPage >= totalPages;
-    }
-
-    // ============================================================
-    // Pagination Controls
-    // ============================================================
-
-    prevPageBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            loadRankings(currentPage, searchQuery);
-        }
+        applyFilters();
     });
-
-    nextPageBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            loadRankings(currentPage, searchQuery);
-        }
-    });
-
-    // ============================================================
-    // Search / Jump to Player
-    // ============================================================
-
-    let searchTimer = null;
-
-    playerSearchInput.addEventListener('input', function () {
-        const query = this.value.trim();
-        clearTimeout(searchTimer);
-
-        if (query.length === 0) {
-            clearSearchBtn.style.display = 'none';
-            searchQuery = '';
-            currentPage = 1;
-            loadRankings(1, '');
-            return;
-        }
-
-        clearSearchBtn.style.display = 'inline-block';
-
-        searchTimer = setTimeout(() => {
-            searchQuery = query;
-            isJumpingToPlayer = true;
-            loadRankings(1, query);
-        }, 400);
-    });
-
-    clearSearchBtn.addEventListener('click', () => {
-        playerSearchInput.value = '';
-        clearSearchBtn.style.display = 'none';
-        searchQuery = '';
-        currentPage = 1;
-        loadRankings(1, '');
-        playerSearchInput.focus();
-    });
-
-    // Keyboard: Enter to jump
-    playerSearchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const query = playerSearchInput.value.trim();
-            if (query.length > 0) {
-                searchQuery = query;
-                isJumpingToPlayer = true;
-                loadRankings(1, query);
-            }
-        }
-    });
-
-    // ============================================================
-    // Utility
-    // ============================================================
-
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-
-    // ============================================================
-    // Init
-    // ============================================================
-
-    loadLatestTournament();
-    loadRankings(1, '');
+});
 </script>
-
 </body>
 </html>
