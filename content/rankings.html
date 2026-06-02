@@ -167,6 +167,7 @@
 
 <script>
 const SOURCE_FILE = 'latest.txt';
+const API_BASE = ''; // Set to API base URL if needed, e.g. 'https://api.example.com'
 const MIN_GAMES = 50;
 const ACTIVE_DAYS = 730;
 
@@ -174,6 +175,7 @@ let allPlayers = [];
 let filteredPlayers = [];
 let sortKey = 'rank';
 let sortAsc = true;
+let playerIdMap = null; // { name_lower: playerId } — fetched from API
 
 const summary = document.getElementById('summary');
 const statusEl = document.getElementById('status');
@@ -181,7 +183,24 @@ const rankingsBody = document.getElementById('rankingsBody');
 const searchBox = document.getElementById('searchBox');
 const countryFilter = document.getElementById('countryFilter');
 
-loadRankings();
+loadPlayerIdMap().then(() => loadRankings());
+
+async function loadPlayerIdMap() {
+    try {
+        const resp = await fetch(`${API_BASE}/players.php?idsonly=1`, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`Failed to fetch player IDs: HTTP ${resp.status}`);
+        const data = await resp.json();
+        const map = {};
+        for (const p of data.players) {
+            map[p.name.toLowerCase().trim()] = p.playerid;
+        }
+        playerIdMap = map;
+    } catch (err) {
+        console.error('Could not load player ID map:', err);
+        // Continue without player links — non-critical
+        playerIdMap = {};
+    }
+}
 
 async function loadRankings() {
     try {
@@ -362,10 +381,15 @@ function renderTable() {
     for (const p of filteredPlayers) {
         const tr = document.createElement('tr');
 
+        const playerId = playerIdMap && playerIdMap[p.name.toLowerCase().trim()];
+        const nameHtml = playerId
+            ? `<a href="player.html?id=${playerId}" style="color: #1f6392; text-decoration: none; font-weight: 500;">${escapeHtml(p.name)}</a>`
+            : escapeHtml(p.name);
+
         tr.innerHTML = `
             <td class="rank">${p.rank}</td>
             <td>${escapeHtml(p.code)}</td>
-            <td>${escapeHtml(p.name)}</td>
+            <td>${nameHtml}</td>
             <td>${escapeHtml(p.country)}</td>
             <td class="rating">${p.rating}</td>
             <td class="hide-mobile">${p.games}</td>
