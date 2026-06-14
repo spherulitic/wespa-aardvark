@@ -1,0 +1,528 @@
+# The name listed first is the preferred name
+# Causeway 2026 name extensions restored from Master Player List
+Araoluwa Joshua Ogunshola,Araoluwa Joshua Ogun
+Chatchai Promtangtrakul,Chatchai Promtangtra
+Kiattanapat Chandaeng,Kiattanapat Chandaen
+Komol Panyasophonlert,Komol Panyasoponlert
+Nopparuj Thipkaew, Nopparuj Tipkaew
+Pattanat Thanapholdumrongdet,Pattanat Thanapholdu
+Peeranat Rattanatunmas,Peeranat Rattanatham
+Phattharadanai Phainok,Pattaradanai Phai-no
+Rajalakshmi Ponnuswamy,Rajalakshmi Ponnuswa
+Sakdipong Lor-udomphun,Sakdipong Lor-Udomph
+Sushanto Bhattacharya,Sushanto Bhattachary
+Tenghe-Abasi Edidiong Francis,Tenghe-Abasi Edidion
+Thanakrit Lersrattanawisutth,Thanakrit Lersrattan
+Thanapat Lersrattanawisutth,Thanapat Lersrattana
+Uwakmfonabasi Ndianabasi Udofia,Uwakmfonabasi Ndiana
+Wichayada Petchtongbun,Wichayada Petchtongb
+
+# Jian Rong's List in 2026
+Charnwit Sukhumrattanaporn,Charnwit Sukhu
+Kulachat Khajornpiwathana,Kulachat Khajorn,Kulachat Khajornpiwat,Kulachat Khajornpiwa
+Chayutt Khajornpiwathana,Chayutt Khajorn,Chayutt Khajornpiwath,Chayutt Khajornpiwat
+Salau Samusideen,Salau Samson
+Raghuram Jonnalagedda,Raghuram Jonnalagedd
+Benjamin Humbe,Humbe Ben
+Wayuphat Thatsate,Wayupat Tatset
+Nathan Tan Rui Ern,Nathan Tan
+Teetouch Chansiri,Teetach Chansiri
+Suthita Prayoonphanrat,Prayoonphanrat Suthi,Suthita Prayoonphanr
+Sitthichok Boonsiriphant,Sitthichok Boonsiri,Sitthicok Boonsiri
+Abdulqudus Olawale Aliu,Qudus Aliu
+Fatih Darielma Gaizta,Fatih Darielma Gaizt
+Supachanya Suanprarom,Supachanya Suanpraro
+Win Inthara,Win Intara
+Kijsupong Wanyen,Kitsupong Wanyen
+Pannatat Tangprasertsiri,Punnatat Tangprasaet
+# Jian Rong's List in 2019
+
+Ejenakevbe Douglas,Ejenas Douglas
+Essang Nduonyi,Nduonyi Essang
+Morara Henry,Henry Morara
+Ekpo Emmanuel,Emmanuel Ekpo
+Peninah Gakuiya,Penina Gakuiya
+Joel Elvis,Elvis Joel James
+Stephen Ssali,Ssali Steven
+Aditya Putra Difa,Aditya P Difa
+Willy Nwabor,Will Nwabor
+Finbarr Long,Finbar Long
+Wasinton Kosanwattana,Wasinthorn Kosanwatt,Wasintorn Kosanwatta
+Adowei Ebikeme,Ebikeme Adowei
+Aditya Kuntjoro,Aditya Kuntjoro Adji
+Imtiazuddin Ahmed,Imtiaz Ahmed
+Christine Nyamoita,Christime Nyamoita
+Sanni Farrouq,Farrouq Sanni
+Moses Owugah,Owuga Moses Adeh
+Bharath Balakrishnan,Bharath Balakrishna
+Krittapat Chulas,Krittapat Chulaser
+Muhammad Alif Iman,Muhd Alif Iman
+Kathirgama Bhaskaran,Kathir Bhaskaran
+Lakshmant Ian,Lakhsmant Ian
+Funmilola Adediran,Adediran Funmilola
+Onwara Visavakul,Orwara Visavakul
+Cherish Amby-Okolo,Cherish Ambi-Okolo
+Meidy Pratama,Meidy Pratama Putra
+Ahmad Kashful Akmal,Ahmad Kashful
+Aishah Saffiyah,Aishah Safiyyah
+Aqila Khattak,Aqila Jamil Khattak
+Maisarah Saiful B,Maisarah Saipul Baha
+Sunita Singh,Sunitha Singh
+Rosaleen Rogers,Rosaleen Rodgers
+Wan Muhammad Akid,Wan Muhammad
+Opeuluwa Adewale,Adewale Opeoluwa
+Joana Chemba,Chemba Joana
+Nuttapong Jaksan,Nathapong Jaksan
+Muhammad Hafizuddin,Mohamad Hafizuddin
+Hazwan Thaqif Mohd,Hazwan Thaqif M A R
+Sahrven Kumar,Sahrven Kumar Mohan
+Ayman Hakiem,Aiman Haqiem
+Sorraaut Ueasamritti,Sorraaut Uesamritti
+Nida Tanweer,Nida Tanveer
+Mahd Ahmed,Mahad Ahmed
+Andil Mushad,Andhil Mushad
+Mary Villanueva,Maria M Villanueva
+Ridhi Ahuja,Riddhi Ahuja
+Esomchukwu Kemakolam,Esom Kemakolam
+Ahmad Badruddin Mohd,Ahmad Badruddin Md F
+Siti Norzulaifa,Siti Norzulaifa Zili
+
+# Duplicates within .tou and .STS files
+
+# Paul Richards, Paul Richards AUS
+
+Shirley de Silva
+Apithai Hemachudha,Apithai Hemachudhaa
+Charae Worapotpisut,Charae Worrapo,Charae Worrapotpisut,Charae Worrapot,Charae Worrapotpisutpisut
+Pakorn Nemitrmansuk,Pakorn Nemitrman
+Simon Harinworrarob,Roongroj Harinth,Simon Harrinworrarob,Roongroj Harinv
+Zulfiqar Ali Hakeem,Zulfiqar Ali
+Edgar Quiogue,Edgar Quioge
+Glennis Hale,Glenis Hale
+Debbe Hossy,Debby Hossy
+George Macaulay
+Jose de Abreu, Jose De Abreu
+Lear Jet De La Cruz
+Amnuay Ploysangngam,Amnuay Ploysa..,Amnuay Ploysang,Amnuay Ploysa,Amnuay Plongsang
+Marcelo Rivera,Marcelo Rivero
+Thirandi De Silva
+Thushini De Silva
+Janul De Silva
+Akegapun Erbprasartsook,Akegapun Erbpras,Akegapun Eripra,Akegapun Erbprasarts
+Yawo Takyi Ananga,Yaw Takyi
+Shem Suleiman,Suleiman Shemouna
+Asad Ul-haq
+KV Chidambaram, Kv Chidambaram
+M.Sugi Arto,M. Sugi Arto
+Thong Liew Kee,ong Liew Kee
+Nikhil Ravishankar,Nikhil Ravishanker
+Sion de Souza
+Garth Van Vliet
+Salha Khatri
+Raja Fuadin Abd,Raja Fuadin Abdullah
+Wenwa Akinyi,Wenya Akinyi
+Osman Ali Khan,Mohammed Osman Ali
+Zahid Sachak,Zak Suchak
+Lynne Powell,Lynn Powell
+Jayne MacKenzie
+Preedee Khongthanarat,Preedee Khongthanara
+Syed Taha ul Huda
+Louie De Guzman
+Lim Sha-Lyn,Lim Sha Lyn,Lim Shalyn
+Onani Magwanga,Magwanga Onani
+Hassan Bin Arshad,Hassan Binarshad
+Nabilah Atikah N A,Nabilah Atikah N.a
+Nurul Amalia A.kamal
+Susan MacGillivray
+
+# Extra People from website slack
+
+Abdul Waheed,Abdul Waheed Belguai
+Ademola Ajayi,Ajayi Ademola
+Aftab Javed,Mir Aftab Javed
+Ahmed Ssenoga,Ahmed Senoga
+Aldwin Gonzales,Aldwin Gonsales
+Ali Rashid,Ali Rashid Khan,Ali Rashid Khan Khan
+Allie Quinn,Allie Quin
+Allie Quinn,Allie Quinnn
+Anil Wickramasinghe,Anil Wickramsinghe
+Anne Ashmore,Anne Hidden
+Asare Samson,Sampson Asare
+Bernard Koyyoko,Benard Koyyoko
+Breda O'Brien,Brid Ni Bhirain
+Brenda Ambler,Lewrenda Ambler
+Bronagh Kenny,Bronargh Kenny
+Conrad Bassett-Bouchard,Conrad BB
+Dan Sandu,Dan Laurentiu Sandu,Dan Laurentiu
+Daniel Buadu Akrong,Daniel Akrong
+Daniel Srichawla,Daniel Srichawala
+Dawuud Minsulaimaan,Dawuud Minsul
+Dawuud Minsulaimaan,Dawuud Minsulaimaanaimaan
+Dunx Keet,Duncan Keet
+GCH DeSilva,GCH De Silva
+Gerry Perez,Gerardo Perez
+Gitonga Nderitu,Patrick Nderitu
+Greens Kamugisha,Kamugisha Greens
+Hamisi Quezi,Hamisi Qwezi
+Hathaiphat Suphattarathorn,Hathaiphat Suphattha
+Hathaiphat Suphattarathorn,Hathaiphat Suphattharr
+Hathaiphat Suphattarathorn,Hathaiphat Supa
+Helen Hynes,Helen Maurus
+Hilda Ben-Nun,Hilda Bennun
+Huub Jan Luyk,Huub Luyk
+Jose de Abreu,Jose D'Abreu
+Joseph McGinley,Joe McGinley
+Julius Auka,Auka Julius
+KMK Kulatunge,Kulathunga Unknown
+KV Chidambaram,Prasad Chidambaram
+Kallayil Ravindran,K Ravindran
+Karl Chin Hon Yew,Chin Hon Yew
+Karl Chin Hon Yew,Karl Karl Chin Hon Yew
+Kashi Thiris,Kashi Ross
+Kathy Richland,Kathy Suddick
+Korakoch Kiatsommart,Korakoch Kiatsom
+Korakoch Kiatsommart,Korakoch Kiatsommartmart
+Kukiat Khunpanitchot,Kukiat Khunpanitch
+Kukiat Khunpanitchot,Kukiat Khunpanitchotot
+Kwaku Sampong,Akosa Sapong
+Lambhotharan Yogan,Lambhotharan Yogana
+Lambhotharan Yogan,Lambotharan Yogan
+Lawrence Onyoin,Laurence Onyoin
+Lukeman Owolabi,Phillips Owolabi
+Malinda Gunawardane,Buddhi Malinda
+Martin DeMello,Martin De Mello
+Mbeleokpo Aganaba,Aganaba Mathew
+Mildred Santos,Mildred Wolpe
+Millie Kikechi,Millie Kikech
+Millie Kikechi,Millie Kikechii
+Mushtak Esmail,Mushtaq Esmail
+Mwenya Munkonge,Munkonge Mwenya
+Naravit Nathapukdi,Naravidh Nathapakdi
+Olatunde Adigun,Adigun Olatunde
+Olatunde Adigun,Tunde Adigun
+Omari Karachi,Omar Karachi
+Oshevire Avwenagha,Osheviri Avwenagha
+Pam Morris,Pamela Morris
+Pasith Teeka-Uttamakorn,Pasit Teeka
+Pasith Teeka-Uttamakorn,Pasit Teeka-Umattakorn-Umattakorn
+Peter Arreola,Pepito Arreola
+Prashanth Seetharam,Prashanth Mysore
+Rachelle Whiteoak,Rachelle Winer
+Ransi Weerasooriya,Ransimala Weeras
+Rastra Teguh,Muhd Rastra Teguh
+Rastra Teguh,Muhd Rastra Teguh Pr
+Renante dela Cerna,Renante Abellano
+Rex Shakespeare,William Shakespeare
+Rita Hennessy,Rita Hennessey
+Rosalind Phillips,Rosalind Philips
+Samuel Nixon,Dr Nixon
+Sanvaris Amorn,Sanwarit Amorn
+Sarah-Jane Holden,Sarah-Jane Jamison
+Singham Pararajasing,S Pararajasingham
+Tawanjames Barwell,Tawan James Barwell
+Thavalakshman Yogan,Thavalakshman Yogana
+Theresa Brousson,Theresa Camilleri
+Vaishali Mehta,Vyshali Mehta
+Victor Ikawa,Joseph Ikawa
+Vivienne Muhling,Viviene Muhling
+Wale Fashina,Saheed Jimoh
+Yi En Gan,Gan Yi En
+Zafar Mahmood,Zaffar Mahmood
+
+# Requested name changes
+
+Mina Le,Mina Del Solar
+Chinedu Thorpe,Chinedu Okwelogu
+Iman Najmi Muis,Iman Najmi
+Harshan Lamabadusuriya, Harshan Lamabad
+Conrad Bassett-Bouchard, Conrad Bassett
+Daniyal Sanaullah,Danial Sanaullah
+Osaghaede Omijeh,Omijeh Osas
+Maydeline Ang,Maydeline Ang Weemay
+Minos Papadogiannakis,Minos Papadogiann
+Natthakorn Siriwatthanaphongsa,Natthakorn Siriwatth,Siriwatthanaphongsa,Natthakorn Siriwatt,Nattakorn Siriwatt
+Orrakanya Phichairatanaphong,Orrakanya Phichairat
+Thanyanat Niratsungnoen,Thanyanat Niratsungn
+Phoomtasin Khensaenkhot,Phoomtasin Khensaenk
+Wolfram Poh, Ying Ming Poh
+Wolfram Poh,Poh Ying Ming
+Nsikak Etim,Nsikan Etim
+Sammotic Switchyarn,Kiattisak Thepsuriya
+Terry Kang,Terry Kang Rau,Terry Rau
+
+# Changes per Bob J, Apr 21 [cl]
+
+Olivia En,Olivia Godfrey
+Stanley Ngundi,Mutua Ngundi
+
+# Changes per Bob, Sep 2021 [cl]
+
+Okado Beryl,Beryl Okando
+Shadrack Kiprono,Shadrack Khalif
+
+# Per Bob, Jan 2022
+
+Lainie Mercieca,Lainie Chojna
+
+# Per Bob J, May 2022
+
+Edwin Mukwasa, Mukasa Edwin
+Kenneth Okuku,Okuku Kenneth
+
+# Jason Broersma, June 2022 - legacy issues from Bob
+
+Zeba Sultan,Zeba Sultana
+Srushti Gandhi,Shrusti Gandhi
+
+# Jason Broersma, June 2022 - truncated names
+
+Abdul-Rashad Mohammed,Abdul-Rashad Mohamme
+Mohamed Ghouse Mohiuddin,Mohamed Ghouse Mohiu
+Syed Ali Abbas Jaffari,Syed Ali Abbas Jaffa
+Patrick Hamilton-Drape,Patrick Hamilton-Dra
+Sarah Hackbarth-Ready,Sarah Hackbarth-Read
+
+# Jason Broersma, June 2022
+
+Bobbie Taylor,Bobbie Penn
+Jinoye Muzan-Ekpelu,Jinoye Muzan
+Harshan Lamabadusuriya,Harshan Lamabadusuri
+
+# Jason Broersma, July 2022
+
+Napat Vatjaranurathorn,Napat Vatjaranuratho
+Thitipol Barameemuang, Thitipol Barameem,
+Stephen Mooney Pursell,Stephen Mooney Purse
+
+# Jason Broersma, August 2022
+
+Tokundo Olowu,Olowu Tokunbo
+
+# Jason Broersma, September 2022
+
+Ishika Shivalingaiah,Ishika Sivalingaiah,Ishika S
+Jiya Bhojania,Jiya B
+
+# Jason Broersma, October 2022
+
+Barbara Bordwell McGrew,Barbara Bordwell McG
+Akinfemisoye Ayomiposi,Akinfemisoye Ayomipo
+Tony Simukoko,Anthony Simukoko
+
+# Jason Broersma, November 2022
+
+Kausalya Thedchanamoorthy,Kausalya Thedchanam
+Samadhi Wimalakeerthi,Samadhi Wimalakeerth
+Sandanindu Batheegama,Sandanindu Batheegam
+Lithula Perumpuliarachchi,Lithula Perumpuli
+Uththara Samarasekara,Uththara Samarasekar
+Gethmin Bohothalearachchi,Gethmin Bohothaleara
+Induwari Hathrusinghe,Induwari Hathrusingh
+
+# Jason Broersma, December 2022
+
+Ahmad Aqmarul Harraz Azhan,Ahmad Aqmarul Harraz,Ahmad Aqmarul Haraz
+
+# Jason Broersma, January 2023
+
+Farida Akbarally,Farida Akbarally Akbarally,Fareeda Akbarally
+Krieshna Parmar,Kreishna Parmar
+
+# Jason Broersma, February 2023
+
+Hema Abeysinghe,Nabena B Hamalatha
+
+# Jason Broersma, March 2023
+
+Mokshavi Gunasekera,Waranga Mokshavi G
+Samson Okosagah,Sammy Okosagah
+Victor Ewarah,Ewarah Squiz
+Laura Ketay,Laura Wolfson
+
+# Jason Broersma, April 2023
+
+Rose Northmore,Rose Kingdom
+Felista Nakazibwe,Felista-Lucia Nakazi
+Moiz Ullah Baig,Moizullah Baig
+Surya Sudharsan,K Sudharsan Surya
+
+# Jason Broersma, May 2023
+
+Avinesh Jayaganes,J Avinesh
+
+# Jason Broersma, August 2023
+
+Krittaphorn Homkampang,Krittaphorn Homkampa
+Olabiyi Olabode,Olabiyi Oyadiran
+Ogedengbe David,Ogedengbe Olawale
+Sompong Phosai,Somphong Phosai
+Eberechukwu Ajayi,Berechukwu Eajayi
+Wong Keen Hing,Justin Wong
+
+# Jason Broersma, October 2023
+
+Mary-Prisca Guttabingi,Mary-Prisca Guttabin
+Max Mason,Tim Mason
+
+# Jason Broersma, November 2023
+
+Farooq Khwaja,Farooq Khawaja
+Sehaan Owais,Sehan Owais
+Winter,Winter Zxqkj
+
+# Jason Broersma, January 2024
+
+Jennifer Clinchy,Jennifer Lee
+Krissanapong Chanchotsathien,Krissanapong Chancho
+Nithimetheekul Arkara,Nithimetheekul Arkar
+Chanthaksaphon Boonkrong,Chanthaksapho Boonkr
+Chayuttra Laisuwanchai,Chayuttra Laisuwanch
+Jirapinya Ngampichitchai,Jirapinya Ngampichit
+Kritsada Sunthornwutthikrai,Kritsada Sunthornwut
+Nattavee Vatjaranurathorn,Nattavee Vatjaranura
+Natthanan Thanathienchaya,Natthanan Thanathien
+Natthaset Pongsridach,Natthaset Pongsridac
+Natthawat Aphiwraphong,Natthawat Aphiwrapho
+Prangtong Thanutanomrad,Prangtong Thanutanom
+Preechapat Pachanasiri,Preechapat Pachanasi
+Rattanawalee Sahasakul,Rattanawalee Sahasak
+Samitanan Mahansukhon,Samitanan Mahansukho
+Sirisaran Direkwatana,Sirisaran Direkwatan
+Suraphon Wachirachaipaisal,Suraphon Wachirachai
+Thanik Leephatravorakul,Thanik Leephatravora
+Thunyarat Sungworasiri,Thunyarat Sungworasi
+Wasin Chanthasartratsamee,Wasin Chanthasartrat
+Richard Geria,Geria Richard
+Sirinapas Isarankura Na Ayudhya,Isarankura Na Ayudhy,Sirinapas Isarankura
+Chaiyottha Manachaisit,Chaiyottha Manachai,Chaiyottha Manachais
+Natthanon Limthongkam,Natthanon Limthongka
+#Sakdipong Lor-Udomphun, Sakdipong Lor-Udomph
+Watcharawit Aengchuan,Watcharawit Aengchua
+Suphakit Thatsanaphan,Suphakit Thatsanapha
+Shubha Shivashankar,Shubha S
+Prasiddha Timalsina,Prasiddha Timal
+
+#Jason Broersma, May 2024
+Kobe Leong,Leong Wai Chun
+Simeon Omolo,Omolo Simeon
+Lisa Mueller,Lisa Brown
+M. Erzie,Muhd Erzie Gufajri P
+Josh Sokol,Joshua Sokol
+Alexis Koh,Alexis Koh Qiian
+Sinatarn Pattanasuwanna,Sinatarn Pattanasuwa
+
+#Joshua Castellano, Nov 2024
+Vincent Castellano,Vince Castellano
+
+# Jian Rong's List in 2024
+Yufen Goh,Go Yu Fen,Goh YuFen
+Winnie Wambugu,Wambugu Winnie
+Soh Yi Xu,Soh.Yi Xu
+Sia Ee Wen,Sia.Ee Wen
+PM Firdhouse,PM Firthows
+Orrakanya Phichairat,Ornkanya Pichairatta
+Nurul Hana Mohd Ali,Nurul Hana
+Nur Amni Nadirah,Nur Amni Nadhirah
+Noor Azmeena Zamiah,Noor Azmeena
+Natnaree San-Ubol,Natraree San-Ubol
+Natdanai Chutrakunwa,Natdanai Chotragolwa
+Muhd Zarif Amdan,Muhd Zarif
+Isaac Goh Wei Kang,Isaac Goh
+Edwin Mukwasa,Edwin Mukasa
+Diya Dawara,Diya Dawra
+Dinesh Murali,Dinesh Murali Pillai
+Devya Kuganesan,Devya.Kuganesan
+Devin Harris,Devin H.
+David Brown,David A Brown
+Bobby Malela,Bobby Malela Hutagal
+Amir Izzani,Amir Izzani Amir Izz
+Akhtar Aziz,Akhter Aziz
+Aingkarat Kodsopa,Aingkharat Kodsopa
+Nazrul Muhaimin,Nazrul Muhaimi Badrl
+Jovan Barracuda Y,Jovan Barracuda
+Fatimah Az Zahara,Fatimah Az Zaharaha
+Agil Ramadhan S,Agil Ramadhan
+Afiqah Balqis Mohd,Afiqah Balqis
+Adib Mukhriz Malek,Adib Mukhriz
+Abu Daniel Abu Samah,Abu Daniel
+Abdul Mateen,Abdul Mateen Mudassi
+Ronald Lwebuga, Ron Lwebuga
+Ronald Lwebuga,Lwebuga Ronald
+Abhishek Lal,Abdhishek Lal
+Nattakit Charee,Nuttakit Chari
+Mensah Mantey,Mohammed Mensah
+Elijah Kumar,Shanthikumar Subra
+Susan Rayner,Susan Ensor
+Judy Godfrey,Judy Jones
+Michael Hardiyanto,H Hardiyanto
+Pasith Teeka-Uttamakorn,Pasith Teeka-Uttama
+Muhd Amirul Hakeem,Amirul H Saharuddin
+Alexius Quarshie, Alex Quarshie
+Alexius Quarshie,Alex Quashie
+Wittayawut Waiprom,Witthayawut Thai
+Wali Muhammad,Vali Khubaib
+Ayub Zande, Zande Ayub
+Ayub Zande,Zanda Ayub
+Sabrina Abd Rashid,Sabrina Abdullah
+Pansub Direkwatana,Direkwatana Pansub
+Sorawit Chuncharoen,Sorawit Chucharoen
+Syed Imaad Ali,Imaad Ali
+Julia Mwaura,Mwaura Julia
+Lindsay Shin, Lindsay Bahra
+Lindsay Shin, Lindsay Crotty
+Lindsay Shin,Lindsay Crotty-Shin
+Nur Syarwina Zulkipl,Nur Syarwina
+Nabilah Novel Chalifah,Nabilah Chalifah
+Brian Jones,Brian Jones ENG
+Phattarawadi Ngamtha,Phattharawadi Ngamta
+Go Yu An,Goh Yu An
+Nur Zulaikha Zuhuri,Nur Zulaikha
+Yanawut Yuangkrathok,Yanawut Yuangrathok
+Olanipekun Febisola,Febisola Olanipekun
+Divyashri Sarthavali,Divyashri Sarthavall
+
+#Jason Broersma, Nov 2024
+Komal RG,Sneha Thadhani
+Sam Normanhenney,Sam McElhinney
+
+#Joshua Castellano, Dec 2024
+Conrad Bassett-Bouchard,Conrad Bassett-Bouch
+Cyril Xavier Hong,Cyril X Hong
+
+#Joshua Castellano, Jan 2025
+Thitipol Barameemuang,Thitipol Barameemuan
+
+#Jason Broersma, Feb 2025
+Ganesh Ramakrishnan,Ganesh Ram
+
+#Jason Broersma, Mar 2025
+Jirakorn Chongchutarat,Jirakorn Chongchuta,Jierakorn Chongchuta
+#Sakdipong Lor-Udomphan, Sakdipong Lor-Udomph  for some reason this change causes the 2024 Thailand Autocar tourney to not work
+Supitchaya Tantisiriwat,Supitchaya Tantisiri,Supitchaya Tantisiriway
+Piyawat Ruangyodngamlert,Piyawat Ruangyodngam,Purinth Vuttich
+Manop Phiphatboonserm,Manop Phiphat
+Vaibhav Bommalapalayam,Vaibhav B,Vaibhav V Bommalapal
+
+#Jason Broersma, May-August 2025
+Samuel Pizzano,Sam Pizzano
+Jacqueline Coldham-Fussell,Jacqueline Coldham-F
+Thenumi Dasanayake,Wijesekara D Vihansa,Thenumi Danasayake
+Hemendranath Seetohul,Hemendranath Seetohu
+Chandrasekar Seetohul,Chandrasekar Seetohu
+Jithuni Vidanapathirana,Jithuni Vidana
+Natamon Sathianbut,Natamon Suksomkid,Nattamon Sathienbutr
+
+#Jian Rong WYSC September 2025
+Kimuyu Beverly Lilian,Kimuyu Beverly Lilia
+Lewis Ling Yoon Loong,Lewis Ling YoonLoong
+Abdulqudus Olawale Aliu,Abdulqudus Olawale A
+Johan Lucille Rosario,Johan Lucille Rosari
+Hamza Bin Hammad,Hamza Binhammad
+Norawit Suwatthanaphon,Norawit Suwatthanaph
+Panyakorn Thawatsuwan,Panyakorn Thawatsuwa
+Thitichaya Prayoonphanrat,Thitichaya Prayoonph
+Kittidet Phoonong-ong,Kittidet Phoonong Ong,Kittidet Phoonong On
+
+#Ravee Joradol September 2025
+Pitchayapak Thamsuwan,Pitchayapak Thamsuwa
+Kanisorn Damrongrachasak,Kanisorn Damrongrach
