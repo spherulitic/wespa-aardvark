@@ -381,7 +381,18 @@ function renderTable() {
     for (const p of filteredPlayers) {
         const tr = document.createElement('tr');
 
-        const playerId = playerIdMap && playerIdMap[p.name.toLowerCase().trim()];
+        const nameKey = p.name.toLowerCase().trim();
+        let playerId = playerIdMap && playerIdMap[nameKey];
+        if (!playerId && playerIdMap) {
+            // If name is > 20 chars, latest.txt truncates to 20, so try a prefix match
+            const prefix = nameKey.slice(0, 20);
+            for (const [key, id] of Object.entries(playerIdMap)) {
+                if (key.slice(0, 20) === prefix) {
+                    playerId = id;
+                    break;
+                }
+            }
+        }
         const nameHtml = playerId
             ? `<a href="player.html?id=${playerId}" style="color: #1f6392; text-decoration: none; font-weight: 500;">${escapeHtml(p.name)}</a>`
             : escapeHtml(p.name);

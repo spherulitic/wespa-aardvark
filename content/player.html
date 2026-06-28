@@ -6,6 +6,7 @@
     <title>WESPA Player Profile | Dynamic Player Stats</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -268,6 +269,85 @@
         .tab-pane.active {
             display: block;
         }
+
+        /* Rating Timeline */
+        .timeline-panel {
+            background: white;
+            border-radius: 24px;
+            padding: 24px 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .timeline-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .timeline-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1e4663;
+        }
+
+        .timeline-description {
+            color: #6c86a3;
+            font-size: 0.86rem;
+            margin-top: 4px;
+        }
+
+        .timeline-chart-wrap {
+            position: relative;
+            height: 390px;
+            width: 100%;
+        }
+
+        .timeline-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .timeline-summary-card {
+            background: #f8fafd;
+            border-radius: 16px;
+            padding: 13px 16px;
+        }
+
+        .timeline-summary-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #5b6e8c;
+            letter-spacing: 0.45px;
+        }
+
+        .timeline-summary-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e4663;
+            margin-top: 2px;
+        }
+
+        .timeline-empty {
+            min-height: 260px;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            color: #6c86a3;
+            background: #f8fafd;
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        @media (max-width: 700px) {
+            .timeline-panel { padding: 20px 16px; }
+            .timeline-chart-wrap { height: 310px; }
+        }
     </style>
 </head>
 <body>
@@ -358,7 +438,7 @@
             <div class="stats-grid">
                 <div class="stats-row">
                     <div class="stat-card"><div class="stat-label">Games Played</div><div class="stat-value">${stats.gamesPlayed || 0}</div></div>
-                    <div class="stat-card"><div class="stat-label">W / L / D</div><div class="stat-value">${stats.wins || 0} / ${stats.losses || 0} / ${stats.draws || 0}</div></div>
+                    <div class="stat-card"><div class="stat-label">Win / Loss / Draw</div><div class="stat-value">${stats.wins || 0} / ${stats.losses || 0} / ${stats.draws || 0}</div></div>
                     <div class="stat-card"><div class="stat-label">Win %</div><div class="stat-value">${stats.winPercentage || 0}%</div></div>
                     <div class="stat-card"><div class="stat-label">Avg Score</div><div class="stat-value">${stats.averageScore || '—'}</div></div>
                     <div class="stat-card"><div class="stat-label">Avg Against</div><div class="stat-value">${stats.averageAgainst || '—'}</div></div>
@@ -519,6 +599,380 @@
         `;
     }
 
+
+    // Rating timeline state
+    let ratingChartInstance = null;
+    let ratingTimelineTournaments = [];
+
+    function toNumber(value) {
+        if (value === null || value === undefined || value === '') return null;
+        const number = Number(value);
+        return Number.isFinite(number) ? number : null;
+    }
+
+    function formatTimelineDate(dateValue) {
+        if (!dateValue) return '—';
+
+        const match = String(dateValue).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        let date;
+
+        if (match) {
+            date = new Date(Date.UTC(
+                Number(match[1]),
+                Number(match[2]) - 1,
+                Number(match[3]),
+                12
+            ));
+        } else {
+            date = new Date(dateValue);
+        }
+
+        if (Number.isNaN(date.getTime())) return String(dateValue);
+
+        return new Intl.DateTimeFormat('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            timeZone: 'UTC'
+        }).format(date);
+    }
+
+    function prepareRatingTimeline(tournaments) {
+        if (!Array.isArray(tournaments)) return [];
+
+        const timeline = tournaments
+            .map((t, index) => {
+                const endRating = toNumber(t.endRating ?? t.end_rating);
+                const ratingChange = toNumber(t.ratingChange ?? t.rating_change);
+                let startRating = toNumber(t.startRating ?? t.start_rating);
+
+                if (startRating === null && endRating !== null && ratingChange !== null) {
+                    startRating = endRating - ratingChange;
+                }
+
+                const rawDate = t.date || t.end_date || t.start_date || '';
+                const timestamp = Date.parse(rawDate);
+
+                return {
+                    index,
+                    name: t.name || t.tournamentName || t.tournament_name || 'Unnamed tournament',
+                    date: rawDate,
+                    timestamp: Number.isFinite(timestamp) ? timestamp : null,
+                    division: t.division || t.division_name || '—',
+                    startRating,
+                    endRating,
+                    ratingChange,
+                    voidedAt2006Cutoff: false
+                };
+            })
+            .filter(t => t.timestamp !== null && t.endRating !== null)
+            .sort((a, b) => {
+                if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+                return a.index - b.index;
+            });
+
+        /*
+         * Legacy-history rule:
+         * Only when records exist before 1 January 2006, void the first point
+         * dated within calendar year 2006. If the player has no tournament
+         * between 1 January and 31 December 2006, no point is voided.
+         */
+        const start2006 = Date.UTC(2006, 0, 1);
+        const start2007 = Date.UTC(2007, 0, 1);
+        const hasPre2006History = timeline.some(t => t.timestamp < start2006);
+
+        if (hasPre2006History) {
+            const firstPointIn2006 = timeline.find(
+                t => t.timestamp >= start2006 && t.timestamp < start2007
+            );
+
+            if (firstPointIn2006) {
+                firstPointIn2006.voidedAt2006Cutoff = true;
+            }
+        }
+
+        return timeline;
+    }
+
+    function buildRatingTimelineTab(tournaments) {
+        ratingTimelineTournaments = prepareRatingTimeline(tournaments);
+
+        const validTimelinePoints = ratingTimelineTournaments.filter(
+            t => !t.voidedAt2006Cutoff
+        );
+
+        if (validTimelinePoints.length === 0) {
+            return `
+                <div class="timeline-panel">
+                    <div class="timeline-header">
+                        <div>
+                            <div class="timeline-title">
+                                <i class="fas fa-chart-line"></i> Rating Timeline
+                            </div>
+                            <div class="timeline-description">
+                                Official ending rating after each recorded tournament.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-empty">
+                        <div>
+                            <i class="fas fa-chart-area fa-3x" style="color:#90b4d9; margin-bottom:14px;"></i>
+                            <p>No rating history is available for this player.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const first = validTimelinePoints[0];
+        const latest = validTimelinePoints[validTimelinePoints.length - 1];
+        const firstRating = first.startRating ?? first.endRating;
+
+        const absolutePeak = validTimelinePoints.reduce(
+            (best, item) => item.endRating > best.endRating ? item : best,
+            validTimelinePoints[0]
+        );
+
+
+        // Rolling two-year window ending today.
+        const twoYearCutoff = new Date();
+        twoYearCutoff.setHours(0, 0, 0, 0);
+        twoYearCutoff.setFullYear(twoYearCutoff.getFullYear() - 2);
+
+        const twoYearPoints = validTimelinePoints.filter(
+            item => item.timestamp >= twoYearCutoff.getTime()
+        );
+
+        const twoYearPeak = twoYearPoints.length
+            ? twoYearPoints.reduce(
+                (best, item) => item.endRating > best.endRating ? item : best,
+                twoYearPoints[0]
+            )
+            : null;
+
+
+        const twoYearPeakValue = twoYearPeak ? twoYearPeak.endRating : '—';
+        const twoYearPeakDate = twoYearPeak
+            ? formatTimelineDate(twoYearPeak.date)
+            : 'No rated tournament in the last 2 years';
+
+        const currentVsTwoYearPeak = twoYearPeak
+            ? latest.endRating - twoYearPeak.endRating
+            : null;
+
+        const currentVsTwoYearPeakText = currentVsTwoYearPeak === null
+            ? '—'
+            : (currentVsTwoYearPeak > 0
+                ? `+${currentVsTwoYearPeak}`
+                : String(currentVsTwoYearPeak));
+
+        const currentVsTwoYearPeakColour = currentVsTwoYearPeak === null
+            ? '#5b6e8c'
+            : (currentVsTwoYearPeak >= 0 ? '#2b7a3e' : '#bc4e2c');
+
+        return `
+            <div class="timeline-panel">
+                <div class="timeline-header">
+                    <div>
+                        <div class="timeline-title">
+                            <i class="fas fa-chart-line"></i> Rating Timeline
+                        </div>
+                        <div class="timeline-description">
+                            Official ending rating after each tournament. Hover over a point for details.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-chart-wrap">
+                    <canvas id="ratingTimelineChart" aria-label="Player rating timeline"></canvas>
+                </div>
+
+                <div class="timeline-summary">
+                    <div class="timeline-summary-card">
+                        <div class="timeline-summary-label">Current</div>
+                        <div class="timeline-summary-value">${latest.endRating}</div>
+                    </div>
+                    <div class="timeline-summary-card">
+                        <div class="timeline-summary-label">Peak (2-year)</div>
+                        <div class="timeline-summary-value">${twoYearPeakValue}</div>
+                        <div class="stat-value-small">${twoYearPeakDate}</div>
+                    </div>
+                    <div class="timeline-summary-card">
+                        <div class="timeline-summary-label">Current vs Peak (2-year)</div>
+                        <div class="timeline-summary-value" style="color:${currentVsTwoYearPeakColour};">
+                            ${currentVsTwoYearPeakText}
+                        </div>
+                        <div class="stat-value-small">
+                            ${currentVsTwoYearPeak === null ? 'No 2-year peak available' : 'Current minus 2-year peak'}
+                        </div>
+                    </div>
+                    <div class="timeline-summary-card">
+                        <div class="timeline-summary-label">Absolute Peak</div>
+                        <div class="timeline-summary-value">${absolutePeak.endRating}</div>
+                        <div class="stat-value-small">${formatTimelineDate(absolutePeak.date)}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderRatingTimelineChart() {
+        const canvas = document.getElementById('ratingTimelineChart');
+        if (!canvas || !window.Chart || ratingTimelineTournaments.length === 0) return;
+
+        if (ratingChartInstance) {
+            ratingChartInstance.resize();
+            return;
+        }
+
+        const labels = ratingTimelineTournaments.map(t => formatTimelineDate(t.date));
+        const values = ratingTimelineTournaments.map(
+            t => t.voidedAt2006Cutoff ? null : t.endRating
+        );
+
+        /*
+         * Draw a dotted bridge across the single voided 2006 point.
+         * Only the valid point immediately before and immediately after the
+         * void are populated in this second dataset.
+         */
+        const bridgeValues = new Array(ratingTimelineTournaments.length).fill(null);
+        const voidedIndex = ratingTimelineTournaments.findIndex(
+            t => t.voidedAt2006Cutoff
+        );
+
+        if (
+            voidedIndex > 0 &&
+            voidedIndex < ratingTimelineTournaments.length - 1
+        ) {
+            bridgeValues[voidedIndex - 1] =
+                ratingTimelineTournaments[voidedIndex - 1].endRating;
+            bridgeValues[voidedIndex + 1] =
+                ratingTimelineTournaments[voidedIndex + 1].endRating;
+        }
+
+        const context = canvas.getContext('2d');
+        const gradient = context.createLinearGradient(0, 0, 0, 390);
+        gradient.addColorStop(0, 'rgba(31, 99, 146, 0.30)');
+        gradient.addColorStop(1, 'rgba(31, 99, 146, 0.02)');
+
+        ratingChartInstance = new Chart(context, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'WESPA Rating',
+                        data: values,
+                        borderColor: '#1f6392',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        fill: true,
+                        spanGaps: false,
+                        tension: 0.18,
+                        pointRadius: ratingTimelineTournaments.length > 80 ? 1.5 : 3,
+                        pointHoverRadius: 6,
+                        pointHitRadius: 12,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#1f6392',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Voided 2006 transition',
+                        data: bridgeValues,
+                        borderColor: '#1f6392',
+                        borderWidth: 2,
+                        borderDash: [6, 6],
+                        fill: false,
+                        spanGaps: true,
+                        tension: 0,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        pointHitRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        displayColors: false,
+                        padding: 12,
+                        filter(item) {
+                            return item.datasetIndex === 0;
+                        },
+                        callbacks: {
+                            title(items) {
+                                const index = items[0]?.dataIndex;
+                                return ratingTimelineTournaments[index]?.name || '';
+                            },
+                            label(item) {
+                                const point = ratingTimelineTournaments[item.dataIndex];
+                                const change = point.ratingChange;
+                                const changeText = change === null
+                                    ? '—'
+                                    : (change > 0 ? `+${change}` : String(change));
+
+                                const lines = [
+                                    `Date: ${formatTimelineDate(point.date)}`,
+                                    `Rating: ${point.startRating ?? '—'} → ${point.endRating}`,
+                                    `Change: ${changeText}`
+                                ];
+
+                                if (point.division && point.division !== '—') {
+                                    lines.push(`Division: ${point.division}`);
+                                }
+
+                                return lines;
+                            }
+                        }
+                    },
+                    decimation: {
+                        enabled: true,
+                        algorithm: 'lttb',
+                        samples: 250
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(90, 110, 138, 0.08)'
+                        },
+                        ticks: {
+                            maxTicksLimit: 10,
+                            maxRotation: 0,
+                            autoSkip: true
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tournament Date'
+                        }
+                    },
+                    y: {
+                        grace: '8%',
+                        grid: {
+                            color: 'rgba(90, 110, 138, 0.12)'
+                        },
+                        ticks: {
+                            precision: 0
+                        },
+                        title: {
+                            display: true,
+                            text: 'WESPA Rating'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     // Head-to-head placeholder (can be expanded later)
     function buildHeadToHeadPlaceholder() {
         return `
@@ -572,19 +1026,33 @@
     // Tab switching
     function attachTabEvents() {
         const btns = document.querySelectorAll('.tab-btn');
+
         btns.forEach(btn => {
             btn.removeEventListener('click', btn._tabListener);
+
             const handler = () => {
                 const targetTab = btn.getAttribute('data-tab');
-                document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('active');
+                });
                 btns.forEach(b => b.classList.remove('active'));
+
                 btn.classList.add('active');
-                if (targetTab === 'results') {
-                    document.getElementById('resultsTab').classList.add('active');
-                } else if (targetTab === 'headtohead') {
-                    document.getElementById('headtoheadTab').classList.add('active');
+
+                const targetPane = document.getElementById(`${targetTab}Tab`);
+                if (targetPane) {
+                    targetPane.classList.add('active');
+                }
+
+                if (targetTab === 'timeline') {
+                    requestAnimationFrame(() => {
+                        renderRatingTimelineChart();
+                        if (ratingChartInstance) ratingChartInstance.resize();
+                    });
                 }
             };
+
             btn._tabListener = handler;
             btn.addEventListener('click', handler);
         });
@@ -624,12 +1092,18 @@
                         <button class="tab-btn active" data-tab="results">
                             <i class="fas fa-table-list"></i> Tournament Results
                         </button>
+                        <button class="tab-btn" data-tab="timeline">
+                            <i class="fas fa-chart-line"></i> Rating Timeline
+                        </button>
                         <button class="tab-btn" data-tab="headtohead">
                             <i class="fas fa-users"></i> Head to Head
                         </button>
                     </div>
                     <div id="resultsTab" class="tab-pane active">
                         ${buildTournamentsTable(data.tournaments, playerId)}
+                    </div>
+                    <div id="timelineTab" class="tab-pane">
+                        ${buildRatingTimelineTab(data.tournaments)}
                     </div>
                     <div id="headtoheadTab" class="tab-pane">
                         ${buildHeadToHeadPlaceholder()}
