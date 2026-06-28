@@ -1073,9 +1073,9 @@
         const playerId = getPlayerIdFromUrl();
         if (!playerId) {
             document.getElementById('loadingView').innerHTML = `
-                <div class="error-box">
-                    <i class="fas fa-exclamation-triangle"></i> Missing player ID.<br>
-                    Use ?id=3039 in the URL.
+                <div class="error-box" style="border-left-color: #2c5f8a; background: #eef2fa;">
+                    <i class="fas fa-user-slash" style="margin-right:8px;"></i> <strong>Player Not Found</strong>
+                    <p style="margin-top:8px;color:#5b6e8c;">The player ID <strong>${escapeHtml(playerId)}</strong> does not exist or has been removed.</p>
                 </div>`;
             return;
         }
@@ -1126,9 +1126,9 @@
         } catch (err) {
             console.error(err);
             document.getElementById('loadingView').innerHTML = `
-                <div class="error-box">
-                    <i class="fas fa-circle-exclamation"></i> Failed to load player data: ${err.message}<br>
-                    Make sure the API v2 endpoints are available.
+                <div class="error-box" style="border-left-color: #2c5f8a; background: #eef2fa;">
+                    <i class="fas fa-user-slash" style="margin-right:8px;"></i> <strong>Player Not Found</strong>
+                    <p style="margin-top:8px;color:#5b6e8c;">The player you're looking for could not be found. It may have been removed or the link may be incorrect.</p>
                 </div>`;
         }
     }
