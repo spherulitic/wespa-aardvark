@@ -140,18 +140,17 @@
 
     async function checkDataFreshness(storedVersion) {
         try {
-            const resp = await fetch(`${API_BASE}/v2/rankings/latest-tournament`);
+            const resp = await fetch(`${API_BASE}/v2/rankings/tournament-count`);
             if (!resp.ok) {
                 // If endpoint fails, assume stale isn't critical — keep cache
                 return true;
             }
 
             const data = await resp.json();
-            // Use the latest tournament date as our version identifier
-            const latestVersion = data.date || 'unknown';
+            // Use the total tournament count as our version identifier
+            const latestCount = data.total_tournaments;
 
-            // Also store the latest tournament name/date for reference
-            return storedVersion === latestVersion;
+            return Number(storedVersion) === latestCount;
         } catch (err) {
             console.warn('Failed to check data freshness:', err);
             // Network issue — keep the cached data
@@ -176,13 +175,13 @@
                 cswrating: p.cswrating != null ? p.cswrating : null
             }));
 
-            // Get the latest tournament date as version identifier
+            // Get the total tournament count as version identifier
             let version = null;
             try {
-                const vresp = await fetch(`${API_BASE}/v2/rankings/latest-tournament`);
+                const vresp = await fetch(`${API_BASE}/v2/rankings/tournament-count`);
                 if (vresp.ok) {
                     const vdata = await vresp.json();
-                    version = vdata.date || null;
+                    version = vdata.total_tournaments ?? null;
                 }
             } catch (_) {}
 
