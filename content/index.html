@@ -94,7 +94,7 @@
     const API_BASE = '/api';
 
     // ============================================================
-    // Player Autocomplete (Client-Side Cache)
+    // Player Autocomplete
     // ============================================================
 
     const playerInput = document.getElementById('playerSearchInput');
@@ -103,62 +103,8 @@
     // In-memory player list: array of { playerid, name, lowerName }
     let allPlayers = [];
 
-    const CACHE_KEY = 'wespa_player_list_v2';
-    const VERSION_KEY = 'wespa_data_version';
-
-    // ---- Load the player list into memory ----
-    async function loadPlayerCache() {
-        // Try restoring from localStorage first
-        const cached = localStorage.getItem(CACHE_KEY);
-        const cachedVersion = localStorage.getItem(VERSION_KEY);
-
-        if (cached && cachedVersion) {
-            try {
-                const parsed = JSON.parse(cached);
-                allPlayers = parsed.map(p => ({
-                    playerid: p.playerid,
-                    name: p.name,
-                    lowerName: p.name.toLowerCase(),
-                    country: p.country || null,
-                    cswrating: p.cswrating != null ? p.cswrating : null
-                }));
-                console.log(`Loaded ${allPlayers.length} players from cache (version: ${cachedVersion})`);
-
-                // Now check if the data is still fresh
-                const fresh = await checkDataFreshness(cachedVersion);
-                if (fresh) return; // cache is still valid
-
-                console.log('Data is stale, re-fetching...');
-            } catch (e) {
-                console.warn('Player cache corrupted, re-fetching');
-            }
-        }
-
-        // Fetch from API
-        await fetchAndCachePlayers();
-    }
-
-    async function checkDataFreshness(storedVersion) {
-        try {
-            const resp = await fetch(`${API_BASE}/v2/rankings/tournament-count`);
-            if (!resp.ok) {
-                // If endpoint fails, assume stale isn't critical — keep cache
-                return true;
-            }
-
-            const data = await resp.json();
-            // Use the total tournament count as our version identifier
-            const latestCount = data.total_tournaments;
-
-            return Number(storedVersion) === latestCount;
-        } catch (err) {
-            console.warn('Failed to check data freshness:', err);
-            // Network issue — keep the cached data
-            return true;
-        }
-    }
-
-    async function fetchAndCachePlayers() {
+    // ---- Load the player list from the API on every page load ----
+    async function loadPlayers() {
         try {
             const resp = await fetch(`${API_BASE}/players.php?idsonly=1`);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -174,26 +120,6 @@
                 country: p.country || null,
                 cswrating: p.cswrating != null ? p.cswrating : null
             }));
-
-            // Get the total tournament count as version identifier
-            let version = null;
-            try {
-                const vresp = await fetch(`${API_BASE}/v2/rankings/tournament-count`);
-                if (vresp.ok) {
-                    const vdata = await vresp.json();
-                    version = vdata.total_tournaments ?? null;
-                }
-            } catch (_) {}
-
-            // Persist to localStorage
-            try {
-                localStorage.setItem(CACHE_KEY, JSON.stringify(players));
-                if (version) {
-                    localStorage.setItem(VERSION_KEY, version);
-                }
-            } catch (e) {
-                console.warn('Could not cache players to localStorage', e);
-            }
 
             console.log(`Fetched ${allPlayers.length} players from API`);
         } catch (err) {
@@ -302,8 +228,8 @@
         }
     });
 
-    // ---- Kick off cache load on page load ----
-    loadPlayerCache();
+    // ---- Kick off player list load on page load ----
+    loadPlayers();
 
     // ============================================================
     // Tournament Search
