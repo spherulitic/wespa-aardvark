@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WESPA Title Qualification Logs</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --navy: #163b5c;
+    --blue: #1f6392;
+    --bg: #f4f7fb;
+    --text: #1f2d3d;
+    --muted: #66788a;
+    --line: #e5ebf2;
+    --gold: #c69214;
+    --ok: #26734d;
+    --warn: #9a6712;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Montserrat", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+.container { max-width: 1350px; margin: 0 auto; padding: 24px; }
+h1 { margin: 0 0 5px; color: var(--navy); letter-spacing: -0.02em; }
+a { color: var(--blue); text-decoration: none; font-weight: 600; }
+a:hover { text-decoration: underline; }
+.header-row { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+.back-link {
+    white-space: nowrap;
+    padding: 10px 13px;
+    border: 1px solid #bdd0e1;
+    background: white;
+    border-radius: 7px;
+}
+.subtext { color: var(--muted); line-height: 1.5; }
+.cards {
+    display:grid;
+    grid-template-columns: repeat(2, minmax(150px, 210px));
+    gap:10px;
+    margin:16px 0 14px;
+}
+.card {
+    background:white;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:10px 12px;
+    box-shadow:0 2px 7px rgba(0,0,0,.04);
+}
+.card-label { color:var(--muted); font-size:10px; text-transform:uppercase; }
+.card-value { color:var(--navy); font-size:20px; font-weight:700; margin-top:2px; }
+.criteria {
+    background:#edf5fb;
+    border:1px solid #caddeb;
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:16px;
+    line-height:1.6;
+    font-size:14px;
+}
+.toolbar {
+    display:grid;
+    grid-template-columns:minmax(260px,1fr) minmax(170px,220px) minmax(170px,220px);
+    gap:10px;
+    margin-bottom:12px;
+}
+input, select {
+    width:100%;
+    padding:10px 12px;
+    border:1px solid #cfd9e6;
+    border-radius:6px;
+    background:white;
+    font:inherit;
+    font-size:14px;
+}
+.status { color:var(--muted); margin:9px 0; font-size:14px; }
+.table-wrap {
+    overflow-x:auto;
+    background:white;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+table { width:100%; border-collapse:collapse; min-width:1360px; }
+th, td {
+    padding:9px 10px;
+    border-bottom:1px solid #edf1f5;
+    text-align:left;
+    vertical-align:top;
+    font-size:13px;
+}
+th {
+    background:var(--navy);
+    color:white;
+    white-space:nowrap;
+    cursor:pointer;
+    user-select:none;
+}
+tbody tr:hover { background:#f7fbff; }
+.badge {
+    display:inline-block;
+    border-radius:999px;
+    padding:3px 8px;
+    font-weight:700;
+    white-space:nowrap;
+}
+.badge-title { color:white; background:#315d88; }
+.badge-status { background:#e9eef3; color:#394b5c; }
+.stars { color:var(--gold); letter-spacing:1px; font-size:16px; }
+.check-ok { color:var(--ok); font-weight:700; }
+.check-progress { color:var(--blue); font-weight:700; }
+.check-review { color:var(--warn); font-weight:700; }
+.muted { color:var(--muted); }
+.player-summary {
+    display:none;
+    background:white;
+    border:1px solid var(--line);
+    border-left:5px solid var(--navy);
+    border-radius:8px;
+    padding:13px 15px;
+    margin-bottom:14px;
+}
+.error {
+    padding:15px;
+    background:#ffecec;
+    border:1px solid #ffb3b3;
+    color:#8a1f1f;
+    border-radius:6px;
+}
+@media(max-width:800px) {
+    .container { padding:14px; }
+    .header-row { display:block; }
+    .back-link { display:inline-block; margin-top:12px; }
+    .cards { grid-template-columns:1fr; }
+    .toolbar { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header-row">
+        <div>
+            <h1>Title Qualification Logs</h1>
+            <div class="subtext" id="summary">Loading qualification records…</div>
+        </div>
+        <a class="back-link" href="titles.html">Back to titles and norms</a>
+    </div>
+
+    <div class="cards">
+        <div class="card"><div class="card-label">Unique log entries</div><div class="card-value" id="logCount">—</div></div>
+        <div class="card"><div class="card-label">Players in log</div><div class="card-value" id="playerCount">—</div></div>
+    </div>
+
+	<div class="criteria">
+	  The source log recors title attainments and qualifying norm performances. A title is attained after three qualifying norms have been recorded. Titles must be earned in sequence: M before IM, and IM before GM. Norms for different title levels cannot be collected concurrently.<br>
+      The player-based requirements for each norm are:
+	  <div><strong>M:</strong> rating ≥ 1800, win rate ≥ 40%, at least 12 games, and post-event RD ≤ 60.0.</div>
+	  <div><strong>IM:</strong> rating ≥ 1900, win rate ≥ 50%, at least 15 games, and post-event RD ≤ 55.0.</div>
+	  <div><strong>GM:</strong> rating ≥ 2000, win rate ≥ 60%, at least 22 games, and post-event RD ≤ 50.0.</div>
+	  Additional requirements relating to event divisions also apply.
+	</div>
+    <div class="player-summary" id="playerSummary"></div>
+
+    <div class="toolbar">
+        <input id="searchBox" type="search" placeholder="Search player or event…">
+        <select id="targetFilter">
+            <option value="">All qualification levels</option>
+            <option value="GM">Grandmaster</option>
+            <option value="IM">International Master</option>
+            <option value="M">Master</option>
+        </select>
+        <select id="checkFilter">
+            <option value="">All verification states</option>
+            <option value="reflected">Reflected / superseded</option>
+            <option value="progress">Progress recorded</option>
+            <option value="review">Review needed</option>
+        </select>
+    </div>
+
+    <div class="status" id="status"></div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th data-sort="date">Date</th>
+                    <th data-sort="currentTitleRank">Title</th>
+                    <th data-sort="name">Player</th>
+                    <th data-sort="event">Event</th>
+                    <th data-sort="winsNumber">Wins / Games</th>
+                    <th>Post-Event Rating</th>
+                    <th data-sort="metricNumber">Post-Event RD</th>
+                    <th>Post-Event Status</th>
+                    <th data-sort="checkRank">Record Status</th>
+                </tr>
+            </thead>
+            <tbody id="body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const LATEST_FILE = "latest.txt";
+const LOG_FILE = "fullpromotions2026.txt";
+const DUPLICATES_FILE = "duplicates.txt";
+const TITLE_RANK = { "--": 0, "M": 1, "IM": 2, "GM": 3 };
+let currentPlayers = new Map();
+let preferredNames = new Map();
+let allRecords = [];
+let shownRecords = [];
+let sortKey = "date";
+let sortAsc = false;
+
+const $ = id => document.getElementById(id);
+const searchBox = $("searchBox");
+const targetFilter = $("targetFilter");
+const checkFilter = $("checkFilter");
+
+initialize();
+
+async function initialize() {
+    try {
+        const version = Date.now();
+        const [latestResponse, logResponse, duplicatesResponse] = await Promise.all([
+            fetch(`${LATEST_FILE}?v=${version}`, { cache:"no-store" }),
+            fetch(`${LOG_FILE}?v=${version}`, { cache:"no-store" }),
+            fetch(`${DUPLICATES_FILE}?v=${version}`, { cache:"no-store" })
+        ]);
+        if (!latestResponse.ok) throw new Error(`Unable to load ${LATEST_FILE}: HTTP ${latestResponse.status}`);
+        if (!logResponse.ok) throw new Error(`Unable to load ${LOG_FILE}: HTTP ${logResponse.status}`);
+        if (!duplicatesResponse.ok) throw new Error(`Unable to load ${DUPLICATES_FILE}: HTTP ${duplicatesResponse.status}`);
+
+        preferredNames = parseDuplicatesTxt(await duplicatesResponse.text());
+        currentPlayers = parseLatest(await latestResponse.text());
+        allRecords = markTitleAttainments(
+            parsePromotionRecords(await logResponse.text())
+        ).map(enrichRecord);
+
+        const requestedPlayer = new URLSearchParams(location.search).get("player");
+        if (requestedPlayer) {
+            searchBox.value = resolvePreferredName(requestedPlayer);
+        }
+
+        updateCounts();
+        applyFilters();
+    } catch (error) {
+        console.error(error);
+        $("summary").innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+    }
+}
+
+function parseLatest(text) {
+    const map = new Map();
+    const lines = text.split(/\r?\n/).filter(line => line.trim());
+    for (const line of lines.slice(1)) {
+        const prefix = line.match(/^(.{4})\s(.{3})\s/);
+        if (!prefix) continue;
+        const match = line.slice(9).match(/^(.+?)\s+(\d+)\s+(\d+)\s+(\d{8})\s+(\d+)\s+(GM|IM|M|--)\s+(\*\*|\*|--)?\s*$/);
+        if (!match) continue;
+        const norms = match[7] || "--";
+        const sourceName = normalizeName(match[1]);
+        const p = {
+            code: prefix[1].trim(),
+            country: prefix[2].trim(),
+            sourceName,
+            name: resolvePreferredName(sourceName),
+            rating: Number(match[3]),
+            title: match[6],
+            titleRank: TITLE_RANK[match[6]],
+            norms,
+            normCount: norms === "**" ? 2 : norms === "*" ? 1 : 0
+        };
+        map.set(nameKey(p.name), p);
+    }
+    return map;
+}
+
+function normalizeName(name) {
+    return String(name).trim().replace(/\s+/g, " ");
+}
+
+function parseDuplicatesTxt(text) {
+    const map = new Map();
+
+    for (const rawLine of text.split(/\r?\n/)) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith("#")) continue;
+
+        const names = line.split(",").map(normalizeName).filter(Boolean);
+        if (!names.length) continue;
+
+        const preferred = names[0];
+        for (const name of names) map.set(nameKey(name), preferred);
+    }
+
+    return map;
+}
+
+function resolvePreferredName(name) {
+    let resolved = normalizeName(name);
+    const seen = new Set();
+
+    while (true) {
+        const key = nameKey(resolved);
+        if (seen.has(key)) break;
+        seen.add(key);
+
+        const next = preferredNames.get(key);
+        if (!next) break;
+
+        const normalizedNext = normalizeName(next);
+        if (nameKey(normalizedNext) === key) {
+            resolved = normalizedNext;
+            break;
+        }
+        resolved = normalizedNext;
+    }
+
+    return resolved;
+}
+
+function parsePromotionRecords(text) {
+    const starts = [...text.matchAll(/20\d{6},/g)].map(m => m.index);
+    const chunks = [];
+    for (let i = 0; i < starts.length; i++) {
+        chunks.push(text.slice(starts[i], starts[i + 1] ?? text.length).trim().replace(/^,+|,+$/g, ""));
+    }
+
+    const seen = new Set();
+    const records = [];
+    for (const chunk of chunks) {
+        const fields = parseCsvRow(chunk);
+        if (fields.length < 9) continue;
+        const sourceName = normalizeName(fields[1] || "");
+        const record = {
+            date: (fields[0] || "").trim(),
+            sourceName,
+            name: resolvePreferredName(sourceName),
+            resultingTitle: normalizeTitle(fields[2]),
+            resultingNorms: normalizeNorms(fields[3]),
+            performance: (fields[4] || "").trim(),
+            wins: (fields[5] || "").trim(),
+            games: (fields[6] || "").trim(),
+            metric: (fields[7] || "").trim(),
+            conclusion: (fields[8] || "").trim(),
+            event: fields.slice(9).join(",").trim().replace(/,+$/g, "")
+        };
+        const fingerprint = JSON.stringify(record);
+        if (!record.name || seen.has(fingerprint)) continue;
+        seen.add(fingerprint);
+        records.push(record);
+    }
+    return records;
+}
+
+function markTitleAttainments(records) {
+    const highestEarlierRank = new Map();
+
+    return records.map(record => {
+        const resultingRank = TITLE_RANK[record.resultingTitle] || 0;
+        const targetMatch = record.conclusion.match(/level\s*\d+\s*\(\s*(GM|IM|M)\s*\)/i);
+        const targetRank = targetMatch ? TITLE_RANK[targetMatch[1].toUpperCase()] : 0;
+        const playerKey = nameKey(record.name);
+        const hasEarlierRecord = highestEarlierRank.has(playerKey);
+        const priorRank = highestEarlierRank.get(playerKey) || 0;
+        const titleAttained = resultingRank > 0 && (
+            resultingRank === targetRank ||
+            (hasEarlierRecord && priorRank === 0 && resultingRank === TITLE_RANK.M)
+        );
+
+        highestEarlierRank.set(playerKey, Math.max(priorRank, resultingRank));
+
+        return { ...record, titleAttained };
+    });
+}
+
+function enrichRecord(record) {
+    const targetMatch = record.conclusion.match(/level\s*\d+\s*\(\s*(GM|IM|M)\s*\)/i);
+    const targetTitle = targetMatch ? targetMatch[1].toUpperCase() : "";
+    const targetRank = TITLE_RANK[targetTitle] || 0;
+    const current = currentPlayers.get(nameKey(record.name));
+    const resultingRank = TITLE_RANK[record.resultingTitle] || 0;
+    const resultingNormCount = record.resultingNorms === "**" ? 2 : record.resultingNorms === "*" ? 1 : 0;
+
+    let check = "review";
+    let checkText = "Review name/status";
+    let checkRank = 0;
+
+    if (current) {
+        if (record.titleAttained && current.titleRank === resultingRank) {
+            check = "reflected";
+            checkText = "Latest title";
+            checkRank = 3;
+        } else if (
+            current.titleRank < targetRank &&
+            current.titleRank === resultingRank &&
+            current.normCount >= resultingNormCount
+        ) {
+            check = "progress";
+            checkText = "Norm recorded";
+            checkRank = 2;
+        } else if (
+            current.titleRank > resultingRank ||
+            (targetRank > 0 && current.titleRank >= targetRank)
+        ) {
+            check = "reflected";
+            checkText = "Superseded";
+            checkRank = 3;
+        } else if (current.titleRank === resultingRank && current.normCount < resultingNormCount) {
+            check = "review";
+            checkText = "Current norm count is lower";
+            checkRank = 0;
+        }
+    }
+
+    return {
+        ...record,
+        targetTitle,
+        targetRank,
+        resultingRank,
+        resultingNormCount,
+        current,
+        currentTitleRank: current ? current.titleRank : 0,
+        currentStatus: current ? statusText(current.title, current.normCount) : "",
+        winsNumber: Number(record.wins) || 0,
+        metricNumber: Number(record.metric) || 0,
+        check,
+        checkText,
+        checkRank
+    };
+}
+
+function updateCounts() {
+    const uniquePlayers = new Set(allRecords.map(r => nameKey(r.name))).size;
+    $("logCount").textContent = allRecords.length.toLocaleString();
+    $("playerCount").textContent = uniquePlayers.toLocaleString();
+    $("summary").textContent =
+        `Based on current ${LATEST_FILE}.`;
+}
+
+function showPlayerSummary(name) {
+    const current = currentPlayers.get(nameKey(name));
+    const box = $("playerSummary");
+    box.style.display = "block";
+    if (!current) {
+        box.innerHTML = `<strong>${escapeHtml(name)}</strong><br><span class="muted">No exact current record was found in ${LATEST_FILE}.</span>`;
+        return;
+    }
+    box.innerHTML = `
+        <strong>${escapeHtml(current.name)}</strong>
+        &nbsp; ${renderStatus(current.title, current.normCount)}
+        &nbsp; <span class="muted">${escapeHtml(current.country)} · Rating ${current.rating}</span>
+    `;
+}
+
+function updatePlayerSummaryFromSearch() {
+    const query = searchBox.value.trim().toLowerCase();
+    const box = $("playerSummary");
+
+    if (!query) {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+    }
+
+    const matchingNames = [...new Set(
+        shownRecords
+            .filter(r =>
+                r.name.toLowerCase().includes(query) ||
+                r.sourceName.toLowerCase().includes(query)
+            )
+            .map(r => r.name)
+    )];
+
+    if (matchingNames.length === 1) {
+        showPlayerSummary(matchingNames[0]);
+    } else {
+        box.style.display = "none";
+        box.innerHTML = "";
+    }
+}
+
+function applyFilters() {
+    const query = searchBox.value.trim().toLowerCase();
+    const target = targetFilter.value;
+    const check = checkFilter.value;
+
+    shownRecords = allRecords.filter(r => {
+        const matchesQuery = !query ||
+            r.name.toLowerCase().includes(query) ||
+            r.sourceName.toLowerCase().includes(query) ||
+            r.event.toLowerCase().includes(query);
+        const matchesCheck = !check ||
+            (check === "reflected" && r.check === "reflected") ||
+            r.check === check;
+        return matchesQuery && (!target || r.targetTitle === target) && matchesCheck;
+    });
+
+    sortRecords();
+    updatePlayerSummaryFromSearch();
+    render();
+}
+
+function sortRecords() {
+    shownRecords.sort((a,b) => {
+        let av = a[sortKey], bv = b[sortKey];
+        let result;
+        if (typeof av === "string") result = av.localeCompare(bv);
+        else result = av - bv;
+        if (!sortAsc) result = -result;
+        if (result !== 0) return result;
+        return b.date.localeCompare(a.date) || a.name.localeCompare(b.name);
+    });
+}
+
+function render() {
+    $("status").textContent =
+        `${shownRecords.length.toLocaleString()} qualification record${shownRecords.length === 1 ? "" : "s"} shown`;
+
+    const body = $("body");
+    body.innerHTML = "";
+    for (const r of shownRecords) {
+        const tr = document.createElement("tr");
+        const currentTitleHtml =
+            r.current && r.current.title !== "--"
+                ? `<span class="badge badge-title">${escapeHtml(r.current.title)}</span>`
+                : "";
+
+        tr.innerHTML = `
+            <td>${formatRawDate(r.date)}</td>
+            <td>${currentTitleHtml}</td>
+            <td><a href="title-logs.html?player=${encodeURIComponent(r.name)}">${escapeHtml(r.name)}</a></td>
+            <td>${escapeHtml(formatEventName(r.event))}</td>
+            <td>${escapeHtml(r.wins)} / ${escapeHtml(r.games)}</td>
+            <td>${escapeHtml(r.performance)}</td>
+            <td>${escapeHtml(formatPostEventRd(r.metric))}</td>
+            <td>${renderStatus(r.resultingTitle, r.resultingNormCount)}</td>
+            <td class="${r.check === "reflected" ? "check-ok" : r.check === "progress" ? "check-progress" : "check-review"}">${escapeHtml(r.checkText)}</td>
+        `;
+        body.appendChild(tr);
+    }
+}
+
+function renderStatus(title, normCount) {
+    const parts = [];
+    if (title && title !== "--") parts.push(`<span class="badge badge-status">${escapeHtml(title)}</span>`);
+    if (normCount) parts.push(`<span class="stars" aria-label="${normCount} norm${normCount === 1 ? "" : "s"}">${"★".repeat(normCount)}</span>`);
+    return parts.join(" ");
+}
+function statusText(title, normCount) {
+    return [title === "--" ? "" : title, normCount ? "★".repeat(normCount) : ""].filter(Boolean).join(" ");
+}
+function normalizeTitle(value) {
+    const title = String(value || "").trim();
+    return ["GM","IM","M"].includes(title) ? title : "--";
+}
+function normalizeNorms(value) {
+    const norms = String(value || "").trim();
+    return norms === "**" || norms === "*" ? norms : "--";
+}
+function parseCsvRow(text) {
+    const fields = [];
+    let field = "";
+    let quoted = false;
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+            if (quoted && text[i+1] === '"') { field += '"'; i++; }
+            else quoted = !quoted;
+        } else if (ch === "," && !quoted) {
+            fields.push(field);
+            field = "";
+        } else if (ch !== "\r" && ch !== "\n") {
+            field += ch;
+        }
+    }
+    fields.push(field);
+    return fields;
+}
+function formatRawDate(raw) {
+    if (!/^\d{8}$/.test(raw)) return escapeHtml(raw);
+    const date = new Date(Number(raw.slice(0,4)), Number(raw.slice(4,6))-1, Number(raw.slice(6,8)));
+    return date.toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+}
+function formatEventName(event) {
+    return String(event || "")
+        .replace(/^\d{2}\.\d{2}\.\d{4}(?:\s*[-–—:]\s*|\s+)/, "")
+        .trim();
+}
+function formatPostEventRd(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number.toFixed(2) : String(value || "").trim();
+}
+function nameKey(name) {
+    return String(name).trim().replace(/\s+/g, " ").toLocaleLowerCase("en");
+}
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+[searchBox, targetFilter, checkFilter].forEach(el => {
+    el.addEventListener(el === searchBox ? "input" : "change", applyFilters);
+});
+document.querySelectorAll("th[data-sort]").forEach(th => {
+    th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (sortKey === key) sortAsc = !sortAsc;
+        else {
+            sortKey = key;
+            sortAsc = ["name","event"].includes(key);
+        }
+        applyFilters();
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WESPA Titles &amp; Norms</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --navy: #163b5c;
+    --blue: #1f6392;
+    --bg: #f4f7fb;
+    --text: #1f2d3d;
+    --muted: #66788a;
+    --line: #e5ebf2;
+    --gold: #c69214;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Montserrat", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+.container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px;
+}
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+}
+h1 {
+    margin: 0 0 5px;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+}
+.subtext { color: var(--muted); line-height: 1.5; }
+.log-link, .player-link {
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: 600;
+}
+.log-link:hover, .player-link:hover { text-decoration: underline; }
+.header-link {
+    white-space: nowrap;
+    padding: 10px 13px;
+    border: 1px solid #bdd0e1;
+    background: white;
+    border-radius: 7px;
+}
+.cards {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(125px, 1fr));
+    gap: 12px;
+    margin: 20px 0 16px;
+}
+.card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 14px;
+    box-shadow: 0 2px 7px rgba(0,0,0,.04);
+}
+.card-label { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+.card-value { color: var(--navy); font-size: 25px; font-weight: 700; margin-top: 4px; }
+.legend {
+    background: #edf5fb;
+    border: 1px solid #caddeb;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    line-height: 1.65;
+    font-size: 14px;
+}
+.toolbar {
+    display: grid;
+    grid-template-columns: minmax(250px, 1fr) repeat(3, minmax(145px, 190px));
+    gap: 10px;
+    margin-bottom: 13px;
+}
+input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cfd9e6;
+    border-radius: 6px;
+    background: white;
+    font: inherit;
+    font-size: 14px;
+}
+.status { color: var(--muted); margin: 9px 0; font-size: 14px; }
+.table-wrap {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+table { width: 100%; border-collapse: collapse; min-width: 860px; }
+th, td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #edf1f5;
+    text-align: left;
+    font-size: 14px;
+}
+th {
+    background: var(--navy);
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+tbody tr:hover { background: #f7fbff; }
+.title-badge {
+    display: inline-block;
+    min-width: 42px;
+    text-align: center;
+    color: white;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 4px 9px;
+}
+.title-GM { background: #8b6710; }
+.title-IM { background: #315d88; }
+.title-M { background: #596978; }
+.stars {
+    color: var(--gold);
+    letter-spacing: 2px;
+    font-size: 17px;
+    white-space: nowrap;
+}
+.rating { font-weight: 700; }
+.muted { color: var(--muted); }
+.verify-none { color: #8c98a4; font-size: 13px; }
+.error {
+    padding: 15px;
+    background: #ffecec;
+    border: 1px solid #ffb3b3;
+    color: #8a1f1f;
+    border-radius: 6px;
+}
+@media (max-width: 800px) {
+    .container { padding: 14px; }
+    .header-row { display: block; }
+    .header-link { display: inline-block; margin-top: 12px; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .toolbar { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 500px) {
+    .toolbar { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header-row">
+        <div>
+            <h1>WESPA Titles &amp; Norms</h1>
+            <div class="subtext" id="summary">Loading title records from latest.txt…</div>
+        </div>
+        <a class="log-link header-link" href="title-logs.html">View qualification logs</a>
+    </div>
+
+    <div class="cards">
+        <div class="card"><div class="card-label">Players listed</div><div class="card-value" id="countAll">—</div></div>
+        <div class="card"><div class="card-label">Grandmasters</div><div class="card-value" id="countGM">—</div></div>
+        <div class="card"><div class="card-label">International Masters</div><div class="card-value" id="countIM">—</div></div>
+        <div class="card"><div class="card-label">Masters</div><div class="card-value" id="countM">—</div></div>
+        <div class="card"><div class="card-label">Norm candidates</div><div class="card-value" id="countNormOnly">—</div></div>
+    </div>
+
+    <div class="legend">
+        <strong>Legend:</strong>
+        <div>GM — Grandmaster &nbsp;·&nbsp; IM — International Master &nbsp;·&nbsp; M — Master.</div>
+        <div><span class="stars" aria-label="Norm star">★</span> shows the norm progress stored in <code>latest.txt</code>.</div>
+    </div>
+
+    <div class="toolbar">
+        <input id="searchBox" type="search" placeholder="Search player, country, or code…">
+        <select id="titleFilter">
+            <option value="">All titles</option>
+            <option value="GM">Grandmaster</option>
+            <option value="IM">International Master</option>
+            <option value="M">Master</option>
+            <option value="--">No title (norms earned)</option>
+        </select>
+        <select id="normFilter">
+            <option value="">All norm records</option>
+            <option value="0">No recorded norm</option>
+            <option value="1">One norm</option>
+            <option value="2">Two norms</option>
+        </select>
+        <select id="countryFilter"><option value="">All countries</option></select>
+    </div>
+
+    <div class="status" id="status"></div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th data-sort="titleRank">Title</th>
+                    <th data-sort="name">Player</th>
+                    <th data-sort="country">Country</th>
+                    <th data-sort="rating">Rating</th>
+                    <th data-sort="normCount">Norms</th>
+                    <th data-sort="awardedDateRaw">Date Awarded</th>
+                    <th>Verification</th>
+                </tr>
+            </thead>
+            <tbody id="body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const SOURCE_FILE = "latest.txt";
+const PROMOTIONS_FILE = "fullpromotions2026.txt";
+const DUPLICATES_FILE = "duplicates.txt";
+const API_BASE = "/api";
+const AUTO_REFRESH_MS = 60 * 1000;
+
+const TITLE_RANK = { "--": 0, "M": 1, "IM": 2, "GM": 3 };
+let allPlayers = [];
+let shownPlayers = [];
+let promotionCounts = new Map();
+let playerIdMap = new Map();
+let preferredNames = new Map();
+let sortKey = "titleRank";
+let sortAsc = false;
+
+const $ = id => document.getElementById(id);
+const searchBox = $("searchBox");
+const titleFilter = $("titleFilter");
+const normFilter = $("normFilter");
+const countryFilter = $("countryFilter");
+
+initialize();
+setInterval(() => loadData(true), AUTO_REFRESH_MS);
+
+async function initialize() {
+    loadPlayerIds();
+    await loadData(false);
+}
+
+async function loadPlayerIds() {
+    try {
+        const response = await fetch(`${API_BASE}/players.php?idsonly=1`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        playerIdMap = new Map(
+            (data.players || [])
+                .filter(p => p.name && p.playerid != null)
+                .map(p => [nameKey(p.name), p.playerid])
+        );
+        render();
+    } catch (error) {
+        console.warn("Player ID lookup unavailable:", error);
+    }
+}
+
+async function loadData(silent) {
+    try {
+        const version = Date.now();
+        const [latestResult, promoResult, duplicatesResult] = await Promise.allSettled([
+            fetch(`${SOURCE_FILE}?v=${version}`, { cache: "no-store" }),
+            fetch(`${PROMOTIONS_FILE}?v=${version}`, { cache: "no-store" }),
+            fetch(`${DUPLICATES_FILE}?v=${version}`, { cache: "no-store" })
+        ]);
+
+        if (latestResult.status !== "fulfilled" || !latestResult.value.ok) {
+            const code = latestResult.status === "fulfilled" ? latestResult.value.status : "network error";
+            throw new Error(`Unable to load ${SOURCE_FILE}: ${code}`);
+        }
+
+        if (duplicatesResult.status === "fulfilled" && duplicatesResult.value.ok) {
+            preferredNames = parseDuplicatesTxt(await duplicatesResult.value.text());
+        } else {
+            preferredNames = new Map();
+        }
+
+        const latestText = await latestResult.value.text();
+        const parsed = parseLatestTxt(latestText);
+        if (!parsed.players.length) throw new Error(`${SOURCE_FILE} contained no titled players.`);
+
+        allPlayers = parsed.players;
+        if (promoResult.status === "fulfilled" && promoResult.value.ok) {
+            const promotionRecords = parsePromotionRecords(await promoResult.value.text());
+            promotionCounts = countPromotionLogs(promotionRecords);
+            applyAwardDates(promotionRecords);
+        } else {
+            promotionCounts = new Map();
+            allPlayers.forEach(p => {
+                p.awardedDateRaw = "";
+                p.awardedDate = null;
+            });
+        }
+
+        updateSummary(parsed.snapshotDate);
+        populateCountries();
+        applyFilters();
+    } catch (error) {
+        console.error(error);
+        if (!silent || !allPlayers.length) {
+            $("summary").innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+        } else {
+            $("status").textContent = "Refresh failed; the previous valid data remains displayed.";
+        }
+    }
+}
+
+function parseLatestTxt(text) {
+    const lines = text.split(/\r?\n/).filter(line => line.trim());
+    if (!lines.length) return { snapshotDate: new Date(), players: [] };
+
+    const dateMatch = lines[0].match(/(\d{8})\s*$/);
+    const snapshotDate = dateMatch ? parseDate(dateMatch[1]) : new Date();
+    const players = [];
+
+    for (const line of lines.slice(1)) {
+        const prefix = line.match(/^(.{4})\s(.{3})\s/);
+        if (!prefix) continue;
+        const payload = line.slice(9);
+        const match = payload.match(/^(.+?)\s+(\d+)\s+(\d+)\s+(\d{8})\s+(\d+)\s+(GM|IM|M|--)\s+(\*\*|\*|--)?\s*$/);
+        if (!match) continue;
+
+        const title = match[6];
+        const norms = match[7] || "--";
+        if (title === "--" && norms === "--") continue;
+        const sourceName = normalizeName(match[1]);
+        players.push({
+            code: prefix[1].trim(),
+            country: prefix[2].trim(),
+            sourceName,
+            name: resolvePreferredName(sourceName),
+            games: Number(match[2]),
+            rating: Number(match[3]),
+            title,
+            titleRank: TITLE_RANK[title],
+            norms,
+            normCount: norms === "**" ? 2 : norms === "*" ? 1 : 0,
+            awardedDateRaw: "",
+            awardedDate: null
+        });
+    }
+
+    players.sort((a, b) =>
+        b.titleRank - a.titleRank ||
+        b.rating - a.rating ||
+        a.name.localeCompare(b.name)
+    );
+    return { snapshotDate, players };
+}
+
+function countPromotionLogs(records) {
+    const counts = new Map();
+    for (const record of records) {
+        const key = nameKey(record.name);
+        counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    return counts;
+}
+
+function applyAwardDates(records) {
+    const playerByName = new Map(allPlayers.map(p => [nameKey(p.name), p]));
+    const earliest = new Map();
+
+    for (const record of records) {
+        const key = nameKey(record.name);
+        const player = playerByName.get(key);
+        if (!player) continue;
+
+        const fullyAwarded =
+            record.resultingTitle === player.title &&
+            record.resultingNorms === "--" &&
+            /^\d{8}$/.test(record.date);
+
+        if (!fullyAwarded) continue;
+        const existing = earliest.get(key);
+        if (!existing || record.date < existing) earliest.set(key, record.date);
+    }
+
+    for (const player of allPlayers) {
+        player.awardedDateRaw = earliest.get(nameKey(player.name)) || "";
+        player.awardedDate = player.awardedDateRaw ? parseDate(player.awardedDateRaw) : null;
+    }
+}
+
+function parsePromotionRecords(text) {
+    const starts = [...text.matchAll(/20\d{6},/g)].map(m => m.index);
+    const chunks = [];
+    for (let i = 0; i < starts.length; i++) {
+        chunks.push(text.slice(starts[i], starts[i + 1] ?? text.length).trim().replace(/^,+|,+$/g, ""));
+    }
+
+    const seen = new Set();
+    const records = [];
+    for (const chunk of chunks) {
+        const fields = parseCsvRow(chunk);
+        if (fields.length < 9) continue;
+        const sourceName = normalizeName(fields[1] || "");
+        const rawTitle = (fields[2] || "").trim();
+        const rawNorms = (fields[3] || "").trim();
+        const record = {
+            date: (fields[0] || "").trim(),
+            sourceName,
+            name: resolvePreferredName(sourceName),
+            resultingTitle: ["GM", "IM", "M"].includes(rawTitle) ? rawTitle : "--",
+            resultingNorms: ["*", "**"].includes(rawNorms) ? rawNorms : "--",
+            performance: (fields[4] || "").trim(),
+            wins: (fields[5] || "").trim(),
+            games: (fields[6] || "").trim(),
+            metric: (fields[7] || "").trim(),
+            conclusion: (fields[8] || "").trim(),
+            event: fields.slice(9).join(",").trim().replace(/,+$/g, "")
+        };
+        const fingerprint = JSON.stringify(record);
+        if (!record.name || seen.has(fingerprint)) continue;
+        seen.add(fingerprint);
+        records.push(record);
+    }
+    return records;
+}
+
+function normalizeName(name) {
+    return String(name).trim().replace(/\s+/g, " ");
+}
+
+function parseDuplicatesTxt(text) {
+    const map = new Map();
+
+    for (const rawLine of text.split(/\r?\n/)) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith("#")) continue;
+
+        const names = line.split(",").map(normalizeName).filter(Boolean);
+        if (!names.length) continue;
+
+        const preferred = names[0];
+        for (const name of names) {
+            map.set(nameKey(name), preferred);
+        }
+    }
+
+    return map;
+}
+
+function resolvePreferredName(name) {
+    let resolved = normalizeName(name);
+    const seen = new Set();
+
+    while (true) {
+        const key = nameKey(resolved);
+        if (seen.has(key)) break;
+        seen.add(key);
+
+        const next = preferredNames.get(key);
+        if (!next) break;
+
+        const normalizedNext = normalizeName(next);
+        if (nameKey(normalizedNext) === key) {
+            resolved = normalizedNext;
+            break;
+        }
+        resolved = normalizedNext;
+    }
+
+    return resolved;
+}
+
+function parseCsvRow(text) {
+    const fields = [];
+    let field = "";
+    let quoted = false;
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+            if (quoted && text[i + 1] === '"') {
+                field += '"';
+                i++;
+            } else {
+                quoted = !quoted;
+            }
+        } else if (ch === "," && !quoted) {
+            fields.push(field);
+            field = "";
+        } else if (ch !== "\r" && ch !== "\n") {
+            field += ch;
+        }
+    }
+    fields.push(field);
+    return fields;
+}
+
+function updateSummary(snapshotDate) {
+    const counts = { GM: 0, IM: 0, M: 0, "--": 0 };
+    allPlayers.forEach(p => counts[p.title]++);
+    $("countAll").textContent = allPlayers.length.toLocaleString();
+    $("countGM").textContent = counts.GM.toLocaleString();
+    $("countIM").textContent = counts.IM.toLocaleString();
+    $("countM").textContent = counts.M.toLocaleString();
+    $("countNormOnly").textContent = counts["--"].toLocaleString();
+    $("summary").textContent =
+        `Players with a title or recorded norm progress in ${SOURCE_FILE}. Snapshot: ${formatDate(snapshotDate)}.`;
+}
+
+function populateCountries() {
+    const selected = countryFilter.value;
+    const countries = [...new Set(allPlayers.map(p => p.country))].sort();
+    countryFilter.innerHTML = '<option value="">All countries</option>';
+    for (const country of countries) {
+        const option = document.createElement("option");
+        option.value = country;
+        option.textContent = country;
+        countryFilter.appendChild(option);
+    }
+    if (countries.includes(selected)) countryFilter.value = selected;
+}
+
+function applyFilters() {
+    const query = searchBox.value.trim().toLowerCase();
+    const title = titleFilter.value;
+    const country = countryFilter.value;
+    const norm = normFilter.value;
+
+    shownPlayers = allPlayers.filter(p => {
+        const matchesQuery = !query ||
+            p.name.toLowerCase().includes(query) ||
+            p.sourceName.toLowerCase().includes(query) ||
+            p.code.toLowerCase().includes(query) ||
+            p.country.toLowerCase().includes(query);
+        return matchesQuery &&
+            (!title || p.title === title) &&
+            (!country || p.country === country) &&
+            (norm === "" || p.normCount === Number(norm));
+    });
+
+    sortPlayers();
+    render();
+}
+
+function sortPlayers() {
+    shownPlayers.sort((a, b) => {
+        let av = a[sortKey];
+        let bv = b[sortKey];
+        if (sortKey === "awardedDateRaw") {
+            const aMissing = !av;
+            const bMissing = !bv;
+            if (aMissing !== bMissing) return aMissing ? 1 : -1;
+        }
+        let result;
+        if (typeof av === "string") result = av.localeCompare(bv);
+        else result = av - bv;
+        if (!sortAsc) result = -result;
+        if (result !== 0) return result;
+        return b.rating - a.rating || a.name.localeCompare(b.name);
+    });
+}
+
+function render() {
+    const body = $("body");
+    body.innerHTML = "";
+    $("status").textContent =
+        `${shownPlayers.length.toLocaleString()} player${shownPlayers.length === 1 ? "" : "s"} shown`;
+
+    for (const p of shownPlayers) {
+        const playerId =
+            playerIdMap.get(nameKey(p.name)) ??
+            playerIdMap.get(nameKey(p.sourceName));
+        const nameHtml = playerId != null
+            ? `<a class="player-link" href="player.html?id=${encodeURIComponent(playerId)}">${escapeHtml(p.name)}</a>`
+            : escapeHtml(p.name);
+
+        const logs = promotionCounts.get(nameKey(p.name)) || 0;
+        const logHtml = logs
+            ? `<a class="log-link" href="title-logs.html?player=${encodeURIComponent(p.name)}">View ${logs} log${logs === 1 ? "" : "s"}</a>`
+            : `<span class="verify-none">No 2026 log</span>`;
+
+        const titleHtml = p.title === "--"
+            ? ""
+            : `<span class="title-badge title-${p.title}">${p.title}</span>`;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${titleHtml}</td>
+            <td>${nameHtml}<div class="muted">${escapeHtml(p.code)}</div></td>
+            <td>${escapeHtml(p.country)}</td>
+            <td class="rating">${p.rating}</td>
+            <td>${renderStars(p.normCount)}</td>
+            <td>${formatRawDate(p.awardedDateRaw)}</td>
+            <td>${logHtml}</td>
+        `;
+        body.appendChild(tr);
+    }
+}
+
+function renderStars(count) {
+    if (!count) return "";
+    const text = "★".repeat(count);
+    return `<span class="stars" title="${count} recorded norm${count === 1 ? "" : "s"}" aria-label="${count} recorded norm${count === 1 ? "" : "s"}">${text}</span>`;
+}
+
+function parseDate(raw) {
+    return new Date(Number(raw.slice(0,4)), Number(raw.slice(4,6)) - 1, Number(raw.slice(6,8)));
+}
+function formatDate(date) {
+    if (!(date instanceof Date) || isNaN(date)) return "";
+    return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+function formatRawDate(raw) {
+    return /^\d{8}$/.test(raw) ? formatDate(parseDate(raw)) : "";
+}
+function nameKey(name) {
+    return String(name).trim().replace(/\s+/g, " ").toLocaleLowerCase("en");
+}
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+[searchBox, titleFilter, normFilter, countryFilter].forEach(el => {
+    el.addEventListener(el === searchBox ? "input" : "change", applyFilters);
+});
+document.querySelectorAll("th[data-sort]").forEach(th => {
+    th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (sortKey === key) sortAsc = !sortAsc;
+        else {
+            sortKey = key;
+            sortAsc = ["name", "country"].includes(key);
+        }
+        applyFilters();
+    });
+});
+</script>
+</body>
+</html>
