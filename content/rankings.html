@@ -88,6 +88,20 @@
         font-weight: 700;
     }
 
+    .name-column {
+        width: 27%;
+    }
+
+    .player-link {
+        color: #1f6392;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .player-link:hover {
+        text-decoration: underline;
+    }
+
     .muted {
         color: #66788a;
     }
@@ -141,7 +155,7 @@
     <div class="subtext" id="summary">Loading latest rankings...</div>
 
     <div class="toolbar">
-        <input id="searchBox" type="text" placeholder="Search player, country, or code..." />
+        <input id="searchBox" type="text" placeholder="Search player, country, or title..." />
         <select id="countryFilter">
             <option value="">All countries</option>
         </select>
@@ -153,8 +167,8 @@
         <thead>
             <tr>
                 <th data-sort="rank">Rank</th>
-                <th data-sort="code">Code</th>
-                <th data-sort="name">Name</th>
+                <th data-sort="titleDisplay">Title</th>
+                <th data-sort="name" class="name-column">Name</th>
                 <th data-sort="country">Country</th>
                 <th data-sort="rating">Rating</th>
                 <th data-sort="games" class="hide-mobile">Games</th>
@@ -167,15 +181,16 @@
 
 <script>
 const SOURCE_FILE = 'latest.txt';
-const API_BASE = '/api'; // Reverse-proxied through nginx to wespa-api.xerafin.net
+const DUPLICATES_FILE = 'duplicates.txt';
 const MIN_GAMES = 50;
 const ACTIVE_DAYS = 730;
+const AUTO_REFRESH_MS = 60 * 1000;
 
 let allPlayers = [];
 let filteredPlayers = [];
 let sortKey = 'rank';
 let sortAsc = true;
-let playerIdMap = null; // { name_lower: playerId } — fetched from API
+let playerIdMap = new Map();
 
 const summary = document.getElementById('summary');
 const statusEl = document.getElementById('status');
@@ -183,52 +198,147 @@ const rankingsBody = document.getElementById('rankingsBody');
 const searchBox = document.getElementById('searchBox');
 const countryFilter = document.getElementById('countryFilter');
 
-loadPlayerIdMap().then(() => loadRankings());
+initializePage();
+setInterval(() => loadRankings({ silent: true }), AUTO_REFRESH_MS);
+
+async function initializePage() {
+    await loadPlayerIdMap();
+    await loadRankings();
+}
 
 async function loadPlayerIdMap() {
     try {
-        const resp = await fetch(`${API_BASE}/players.php?idsonly=1`, { cache: 'no-store' });
+        const resp = await fetch('/players.json');
         if (!resp.ok) throw new Error(`Failed to fetch player IDs: HTTP ${resp.status}`);
+
         const data = await resp.json();
-        const map = {};
-        for (const p of data.players) {
-            map[p.name.toLowerCase().trim()] = p.playerid;
+        const map = new Map();
+
+        for (const p of data.players || []) {
+            if (!p.name || p.playerid == null) continue;
+            map.set(nameKey(p.name), p.playerid);
         }
+
         playerIdMap = map;
     } catch (err) {
         console.error('Could not load player ID map:', err);
-        // Continue without player links — non-critical
-        playerIdMap = {};
+        playerIdMap = new Map();
     }
 }
 
-async function loadRankings() {
+async function loadRankings({ silent = false } = {}) {
     try {
-        const resp = await fetch(SOURCE_FILE, { cache: 'no-store' });
-        if (!resp.ok) throw new Error(`Unable to load ${SOURCE_FILE}: HTTP ${resp.status}`);
+        // Cache-busting ensures both uploaded source files are reread.
+        const version = Date.now();
+        const [rankingsResp, duplicatesResp] = await Promise.all([
+            fetch(`${SOURCE_FILE}?v=${version}`, { cache: 'no-store' }),
+            fetch(`${DUPLICATES_FILE}?v=${version}`, { cache: 'no-store' })
+        ]);
 
-        const text = await resp.text();
-        const parsed = parseLatestTxt(text);
+        if (!rankingsResp.ok) {
+            throw new Error(`Unable to load ${SOURCE_FILE}: HTTP ${rankingsResp.status}`);
+        }
+        if (!duplicatesResp.ok) {
+            throw new Error(`Unable to load ${DUPLICATES_FILE}: HTTP ${duplicatesResp.status}`);
+        }
+
+        const [text, duplicatesText] = await Promise.all([
+            rankingsResp.text(),
+            duplicatesResp.text()
+        ]);
+
+        const preferredNames = parseDuplicatesTxt(duplicatesText);
+        const parsed = parseLatestTxt(text, preferredNames);
+
+        // Protect the current page from a partially uploaded or malformed file.
+        if (parsed.players.length === 0) {
+            throw new Error(`${SOURCE_FILE} contained no valid active ranking records.`);
+        }
 
         allPlayers = parsed.players;
         populateCountryFilter(allPlayers);
 
-		summary.innerHTML = `
-			<div class="explainer">
-				Showing players active within 2 years with at least ${MIN_GAMES} rated games.
-			</div>
-			<div class="last-updated">
-				Last updated: ${formatDate(parsed.snapshotDate)}
-			</div>
-		`;
+        summary.innerHTML = `
+            <div class="explainer">
+                Showing players active within 2 years with at least ${MIN_GAMES} rated games.
+            </div>
+            <div class="last-updated">
+                Last updated: ${formatDate(parsed.snapshotDate)}
+            </div>
+        `;
         applyFilters();
     } catch (err) {
         console.error(err);
-        summary.innerHTML = `<div class="error">${err.message}</div>`;
+        if (!silent || allPlayers.length === 0) {
+            summary.innerHTML = `<div class="error">${escapeHtml(err.message)}</div>`;
+        } else {
+            statusEl.textContent = `Automatic refresh failed; showing the previous valid rankings.`;
+        }
     }
 }
 
-function parseLatestTxt(text) {
+function normalizeName(name) {
+    return String(name)
+        .trim()
+        .replace(/\s+/g, ' ');
+}
+
+function nameKey(name) {
+    return normalizeName(name).toLocaleLowerCase('en');
+}
+
+function parseDuplicatesTxt(text) {
+    const preferredNames = new Map();
+
+    for (const rawLine of text.split(/\r?\n/)) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) continue;
+
+        const names = line
+            .split(',')
+            .map(normalizeName)
+            .filter(Boolean);
+
+        if (names.length === 0) continue;
+
+        const preferred = names[0];
+
+        // Last declaration wins. This lets later correction sections override
+        // an older mapping higher up in duplicates.txt.
+        for (const name of names) {
+            preferredNames.set(nameKey(name), preferred);
+        }
+    }
+
+    return preferredNames;
+}
+
+function resolvePreferredName(name, preferredNames) {
+    let resolved = normalizeName(name);
+    const seen = new Set();
+
+    // Follow chained mappings safely, e.g. old alias -> newer alias -> preferred.
+    while (true) {
+        const key = nameKey(resolved);
+        if (seen.has(key)) break;
+        seen.add(key);
+
+        const next = preferredNames.get(key);
+        if (!next) break;
+
+        const nextName = normalizeName(next);
+        if (nameKey(nextName) === key) {
+            resolved = nextName;
+            break;
+        }
+
+        resolved = nextName;
+    }
+
+    return resolved;
+}
+
+function parseLatestTxt(text, preferredNames) {
     const lines = text.split(/\r?\n/).filter(line => line.trim());
 
     if (lines.length === 0) {
@@ -250,6 +360,9 @@ function parseLatestTxt(text) {
         const p = parsePlayerLine(lines[i]);
         if (!p) continue;
 
+        p.sourceName = p.name;
+        p.name = resolvePreferredName(p.name, preferredNames);
+
         if (p.games < MIN_GAMES) continue;
         if (p.lastPlayed < cutoff) continue;
 
@@ -257,7 +370,11 @@ function parseLatestTxt(text) {
     }
 
     // latest.txt is already rating-sorted, but sort again for safety.
-    players.sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
+    players.sort((a, b) =>
+    b.rating - a.rating ||
+    b.games - a.games ||
+    a.name.localeCompare(b.name)
+);
 
     players.forEach((p, idx) => {
         p.rank = idx + 1;
@@ -268,40 +385,50 @@ function parseLatestTxt(text) {
 
 function parsePlayerLine(line) {
     /*
-      Expected fixed-width format:
-      0-3   code
-      5-7   country
-      9-28  name
-      then: games rating lastPlayed class title markers
+      latest.txt begins with fixed fields for code and country. The remaining
+      fields are parsed from the right so 20-character names, apostrophes,
+      hyphens and embedded spaces remain safe. The final two fields contain
+      the player's title and norm progress.
     */
 
-    if (line.length < 45) return null;
+    if (line.length < 20) return null;
 
-    const code = line.slice(0, 4).trim();
-    const country = line.slice(5, 8).trim();
-    const name = line.slice(9, 30).trim();
-    const rest = line.slice(29).trim();
+    const prefix = line.match(/^(.{4})\s(.{3})\s/);
+    if (!prefix) return null;
 
-    const parts = rest.split(/\s+/);
+    const code = prefix[1].trim();
+    const country = prefix[2].trim();
+    const payload = line.slice(9);
+    const match = payload.match(
+        /^(.+?)\s+(\d+)\s+(\d+)\s+(\d{8})\s+\d+\s+(GM|IM|M|--)\s+(\*+|--)\s*$/
+    );
+    if (!match) return null;
 
-    if (parts.length < 3) return null;
-
-    const games = Number(parts[0]);
-    const rating = Number(parts[1]);
-    const lastPlayedRaw = parts[2];
+    const name = match[1].trim();
+    const games = Number(match[2]);
+    const rating = Number(match[3]);
+    const lastPlayedRaw = match[4];
+    const title = match[5] === '--' ? '' : match[5];
+    const norms = match[6] === '--' ? '' : match[6];
+    const titleDisplay = `${title}${norms}`;
 
     if (!code || !country || !name) return null;
     if (!Number.isFinite(games) || !Number.isFinite(rating)) return null;
-    if (!/^\d{8}$/.test(lastPlayedRaw)) return null;
+
+    const lastPlayed = parseYYYYMMDD(lastPlayedRaw);
+    if (isNaN(lastPlayed)) return null;
 
     return {
         code,
+        title,
+        norms,
+        titleDisplay,
         country,
         name,
         games,
         rating,
         lastPlayedRaw,
-        lastPlayed: parseYYYYMMDD(lastPlayedRaw)
+        lastPlayed
     };
 }
 
@@ -322,13 +449,20 @@ function formatDate(d) {
 }
 
 function populateCountryFilter(players) {
+    const selected = countryFilter.value;
     const countries = [...new Set(players.map(p => p.country))].sort();
+
+    countryFilter.innerHTML = '<option value="">All countries</option>';
 
     for (const c of countries) {
         const opt = document.createElement('option');
         opt.value = c;
         opt.textContent = c;
         countryFilter.appendChild(opt);
+    }
+
+    if (countries.includes(selected)) {
+        countryFilter.value = selected;
     }
 }
 
@@ -340,7 +474,8 @@ function applyFilters() {
         const matchesSearch =
             !q ||
             p.name.toLowerCase().includes(q) ||
-            p.code.toLowerCase().includes(q) ||
+            p.sourceName.toLowerCase().includes(q) ||
+            p.titleDisplay.toLowerCase().includes(q) ||
             p.country.toLowerCase().includes(q);
 
         const matchesCountry = !country || p.country === country;
@@ -381,26 +516,18 @@ function renderTable() {
     for (const p of filteredPlayers) {
         const tr = document.createElement('tr');
 
-        const nameKey = p.name.toLowerCase().trim();
-        let playerId = playerIdMap && playerIdMap[nameKey];
-        if (!playerId && playerIdMap) {
-            // If name is > 20 chars, latest.txt truncates to 20, so try a prefix match
-            const prefix = nameKey.slice(0, 20);
-            for (const [key, id] of Object.entries(playerIdMap)) {
-                if (key.slice(0, 20) === prefix) {
-                    playerId = id;
-                    break;
-                }
-            }
-        }
-        const nameHtml = playerId
-            ? `<a href="player.html?id=${playerId}" style="color: #1f6392; text-decoration: none; font-weight: 500;">${escapeHtml(p.name)}</a>`
+        const playerId =
+            playerIdMap.get(nameKey(p.name)) ??
+            playerIdMap.get(nameKey(p.sourceName));
+
+        const nameHtml = playerId != null
+            ? `<a class="player-link" href="player.html?id=${encodeURIComponent(playerId)}">${escapeHtml(p.name)}</a>`
             : escapeHtml(p.name);
 
         tr.innerHTML = `
             <td class="rank">${p.rank}</td>
-            <td>${escapeHtml(p.code)}</td>
-            <td>${nameHtml}</td>
+            <td>${escapeHtml(p.titleDisplay)}</td>
+            <td class="name-column">${nameHtml}</td>
             <td>${escapeHtml(p.country)}</td>
             <td class="rating">${p.rating}</td>
             <td class="hide-mobile">${p.games}</td>
@@ -431,7 +558,7 @@ document.querySelectorAll('th[data-sort]').forEach(th => {
             sortAsc = !sortAsc;
         } else {
             sortKey = key;
-            sortAsc = key === 'name' || key === 'country' || key === 'code';
+            sortAsc = key === 'name' || key === 'country' || key === 'titleDisplay';
         }
 
         applyFilters();
