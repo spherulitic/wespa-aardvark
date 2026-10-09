@@ -108,10 +108,10 @@
     // In-memory player list: array of { playerid, name, lowerName }
     let allPlayers = [];
 
-    // ---- Load the player list from the API on every page load ----
+    // ---- Load the player list (build artifact) on every page load ----
     async function loadPlayers() {
         try {
-            const resp = await fetch(`${API_BASE}/players.php?idsonly=1`);
+            const resp = await fetch('/players.json');
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
             const data = await resp.json();
@@ -126,7 +126,7 @@
                 cswrating: p.cswrating != null ? p.cswrating : null
             }));
 
-            console.log(`Fetched ${allPlayers.length} players from API`);
+            console.log(`Fetched ${allPlayers.length} players from players.json`);
         } catch (err) {
             console.error('Failed to fetch player list:', err);
         }

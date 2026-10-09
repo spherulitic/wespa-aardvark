@@ -218,7 +218,6 @@ tbody tr:hover { background: #f7fbff; }
 const SOURCE_FILE = "latest.txt";
 const PROMOTIONS_FILE = "fullpromotions2026.txt";
 const DUPLICATES_FILE = "duplicates.txt";
-const API_BASE = "/api";
 const AUTO_REFRESH_MS = 60 * 1000;
 
 const TITLE_RANK = { "--": 0, "M": 1, "IM": 2, "GM": 3 };
@@ -246,7 +245,7 @@ async function initialize() {
 
 async function loadPlayerIds() {
     try {
-        const response = await fetch(`${API_BASE}/players.php?idsonly=1`, { cache: "no-store" });
+        const response = await fetch("/players.json");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         playerIdMap = new Map(

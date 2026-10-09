@@ -182,7 +182,6 @@
 <script>
 const SOURCE_FILE = 'latest.txt';
 const DUPLICATES_FILE = 'duplicates.txt';
-const API_BASE = '/api';
 const MIN_GAMES = 50;
 const ACTIVE_DAYS = 730;
 const AUTO_REFRESH_MS = 60 * 1000;
@@ -209,7 +208,7 @@ async function initializePage() {
 
 async function loadPlayerIdMap() {
     try {
-        const resp = await fetch(`${API_BASE}/players.php?idsonly=1`, { cache: 'no-store' });
+        const resp = await fetch('/players.json');
         if (!resp.ok) throw new Error(`Failed to fetch player IDs: HTTP ${resp.status}`);
 
         const data = await resp.json();
